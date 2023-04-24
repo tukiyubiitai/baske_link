@@ -1,0 +1,58 @@
+name: basketball_app
+description: A new Flutter project.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.19.3 <3.0.0'
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+
+
+  cupertino_icons: ^1.0.2
+  google_maps_flutter: ^2.2.5
+  geolocator: ^9.0.2
+  adaptive_dialog: ^1.8.2
+  http: ^0.13.5
+  http_parser: ^4.0.2
+  path_provider: ^2.0.13
+  path:
+  provider: ^6.0.5
+  geocoding: ^2.1.0
+  image_picker: ^0.8.7+4
+  google_sign_in: ^6.1.0
+  font_awesome_flutter: ^10.4.0
+  flutter_datetime_picker: ^1.5.1
+  intl: ^0.17.0
+  google_place: ^0.4.7
+
+  firebase_database: ^10.1.1
+  firebase_storage: ^11.1.1
+  firebase_core: ^2.10.0
+  cloud_firestore: ^4.5.2
+  firebase_auth: ^4.4.2
+
+
+
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+  json_serializable: ^6.6.1
+  build_runner: ^2.3.3
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+
