@@ -44,40 +44,38 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCzMPvN8IlDrkkAE9pgn1AUwdZn0DTb1N0',
-    appId: '1:961571618026:web:315510405519ccbcdb2b93',
-    messagingSenderId: '961571618026',
-    projectId: 'basket-ball-app',
-    authDomain: 'basket-ball-app.firebaseapp.com',
-    storageBucket: 'basket-ball-app.appspot.com',
-    measurementId: 'G-868Y39WB6L',
+    apiKey: 'AIzaSyDe9Ov99yromnwTxztEOFFXoxeE_rxtFZQ',
+    appId: '1:1007612328339:web:bc28ea9deac99914659066',
+    messagingSenderId: '1007612328339',
+    projectId: 'basketball-app-d033d',
+    authDomain: 'basketball-app-d033d.firebaseapp.com',
+    storageBucket: 'basketball-app-d033d.appspot.com',
+    measurementId: 'G-SG4DX364T9',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDE59qeF5hMU4BYlMsdRrA5As0uBzZXUmg',
-    appId: '1:961571618026:android:3ffc6b228bcf941fdb2b93',
-    messagingSenderId: '961571618026',
-    projectId: 'basket-ball-app',
-    storageBucket: 'basket-ball-app.appspot.com',
+    apiKey: 'AIzaSyBtNWT2aEtnVFKl00NeFavQMf_YTSaNi2w',
+    appId: '1:1007612328339:android:fcc5f3ce53b8c0b5659066',
+    messagingSenderId: '1007612328339',
+    projectId: 'basketball-app-d033d',
+    storageBucket: 'basketball-app-d033d.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyC5305mU3bn2HCu9zqGzzSOKLuXBA3PPwk',
-    appId: '1:961571618026:ios:1faff1226bbad08ddb2b93',
-    messagingSenderId: '961571618026',
-    projectId: 'basket-ball-app',
-    storageBucket: 'basket-ball-app.appspot.com',
-    iosClientId: '961571618026-ova8unfl5d211vtsbfrihbc90djl5fnn.apps.googleusercontent.com',
-    iosBundleId: 'com.example.searchMassage',
+    apiKey: 'AIzaSyDzGNu5FsyDv0x0ef8xgjwgMXTq6SYKzs8',
+    appId: '1:1007612328339:ios:8b300be20fa1584c659066',
+    messagingSenderId: '1007612328339',
+    projectId: 'basketball-app-d033d',
+    storageBucket: 'basketball-app-d033d.appspot.com',
+    iosBundleId: 'com.Basket.link',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyC5305mU3bn2HCu9zqGzzSOKLuXBA3PPwk',
-    appId: '1:961571618026:ios:1faff1226bbad08ddb2b93',
-    messagingSenderId: '961571618026',
-    projectId: 'basket-ball-app',
-    storageBucket: 'basket-ball-app.appspot.com',
-    iosClientId: '961571618026-ova8unfl5d211vtsbfrihbc90djl5fnn.apps.googleusercontent.com',
+    apiKey: 'AIzaSyDzGNu5FsyDv0x0ef8xgjwgMXTq6SYKzs8',
+    appId: '1:1007612328339:ios:434d6af85b2054bc659066',
+    messagingSenderId: '1007612328339',
+    projectId: 'basketball-app-d033d',
+    storageBucket: 'basketball-app-d033d.appspot.com',
     iosBundleId: 'com.example.searchMassage',
   );
 }

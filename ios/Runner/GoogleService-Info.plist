@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>961571618026-ova8unfl5d211vtsbfrihbc90djl5fnn.apps.googleusercontent.com</string>
+	<string>1007612328339-50ku9sgvm4nvmv213jckju579b36gkeh.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.961571618026-ova8unfl5d211vtsbfrihbc90djl5fnn</string>
+	<string>com.googleusercontent.apps.1007612328339-50ku9sgvm4nvmv213jckju579b36gkeh</string>
 	<key>API_KEY</key>
-	<string>AIzaSyC5305mU3bn2HCu9zqGzzSOKLuXBA3PPwk</string>
+	<string>AIzaSyDzGNu5FsyDv0x0ef8xgjwgMXTq6SYKzs8</string>
 	<key>GCM_SENDER_ID</key>
-	<string>961571618026</string>
+	<string>1007612328339</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.searchMassage</string>
+	<string>com.Basket.link</string>
 	<key>PROJECT_ID</key>
-	<string>basket-ball-app</string>
+	<string>basketball-app-d033d</string>
 	<key>STORAGE_BUCKET</key>
-	<string>basket-ball-app.appspot.com</string>
+	<string>basketball-app-d033d.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:961571618026:ios:1faff1226bbad08ddb2b93</string>
+	<string>1:1007612328339:ios:8b300be20fa1584c659066</string>
 </dict>
 </plist>

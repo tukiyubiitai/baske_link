@@ -1,43 +1,26 @@
 {
   "project_info": {
-    "project_number": "961571618026",
-    "project_id": "basket-ball-app",
-    "storage_bucket": "basket-ball-app.appspot.com"
+    "project_number": "1007612328339",
+    "project_id": "basketball-app-d033d",
+    "storage_bucket": "basketball-app-d033d.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:961571618026:android:3ffc6b228bcf941fdb2b93",
+        "mobilesdk_app_id": "1:1007612328339:android:fcc5f3ce53b8c0b5659066",
         "android_client_info": {
-          "package_name": "com.example.search_massage"
+          "package_name": "com.example.basketApp"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "961571618026-8f8eha706t2outt8i2p04qb11k2d24sv.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDE59qeF5hMU4BYlMsdRrA5As0uBzZXUmg"
+          "current_key": "AIzaSyBtNWT2aEtnVFKl00NeFavQMf_YTSaNi2w"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "961571618026-8f8eha706t2outt8i2p04qb11k2d24sv.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "961571618026-ova8unfl5d211vtsbfrihbc90djl5fnn.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.searchMassage"
-              }
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
