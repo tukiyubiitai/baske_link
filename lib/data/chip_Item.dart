@@ -1,32 +1,32 @@
-import '../screen/post/team_posts.dart';
+import '../screen/post/team_post_page.dart';
 
 //年齢
 final List<FilterChipItemWidget> ageChipItems = <FilterChipItemWidget>[
-  FilterChipItemWidget('10代'),
-  FilterChipItemWidget('20代'),
-  FilterChipItemWidget('30代'),
-  FilterChipItemWidget('40代'),
-  FilterChipItemWidget('50代'),
-  FilterChipItemWidget('60代以上'),
+  const FilterChipItemWidget('10代'),
+  const FilterChipItemWidget('20代'),
+  const FilterChipItemWidget('30代'),
+  const FilterChipItemWidget('40代'),
+  const FilterChipItemWidget('50代'),
+  const FilterChipItemWidget('60代以上'),
 ];
 
 //target
 final List<FilterChipItemWidget> targetChipItems = <FilterChipItemWidget>[
-  FilterChipItemWidget('初心者'),
-  FilterChipItemWidget('経験者'),
-  FilterChipItemWidget('学生'),
-  FilterChipItemWidget('社会人'),
-  FilterChipItemWidget('男子'),
-  FilterChipItemWidget('女子'),
-  FilterChipItemWidget('男女'),
+  const FilterChipItemWidget('初心者'),
+  const FilterChipItemWidget('経験者'),
+  const FilterChipItemWidget('学生'),
+  const FilterChipItemWidget('社会人'),
+  const FilterChipItemWidget('男子'),
+  const FilterChipItemWidget('女子'),
+  const FilterChipItemWidget('男女'),
 ];
 
 //絞り込み
 final List<FilterChipItemWidget> narrowChipItems = <FilterChipItemWidget>[
-  FilterChipItemWidget('場所'),
+  const FilterChipItemWidget('場所'),
 ];
 
 //絞り込み
-final List<FilterChipItemWidget> ChipItem = <FilterChipItemWidget>[
-  FilterChipItemWidget('検索'),
+final List<FilterChipItemWidget> chipItem = <FilterChipItemWidget>[
+  const FilterChipItemWidget('検索'),
 ];

@@ -1,12 +1,12 @@
-import 'package:basketball_app/models/chat_post.dart';
-import 'package:basketball_app/utils/room_firebase.dart';
+import 'package:basketball_app/models/talkroom.dart';
+import 'package:basketball_app/repository/room_firebase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 
-import '../models/message.dart';
-import '../utils/authentication.dart';
-import '../utils/progress_dialog.dart';
+import '../../models/message.dart';
+import '../../utils/authentication.dart';
+import '../../widgets/common_widgets/progress_dialog.dart';
 
 class TalkPage extends StatefulWidget {
   final TalkRoom talkRoom;
@@ -20,20 +20,13 @@ class TalkPage extends StatefulWidget {
 class _TalkPageState extends State<TalkPage> {
   final TextEditingController controller = TextEditingController();
 
-  //ここでtoken取得
-  // void setupPushNotifications() async {
-  //   final fcm = FirebaseMessaging.instance;
-  //
-  //   await fcm.requestPermission();
-  //   fcm.subscribeToTopic("chat");
-  //   // final token = await fcm.getToken();
-  // }
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    // setupPushNotifications();
+
+    RoomFirestore.updateMessageReadStatus(widget.talkRoom.roomId as String,
+        Authentication.myAccount!.id, widget.talkRoom.talkUser!.id);
   }
 
   @override
@@ -57,7 +50,7 @@ class _TalkPageState extends State<TalkPage> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 60.0),
                     child: ListView.builder(
-                        physics: RangeMaintainingScrollPhysics(),
+                        physics: const RangeMaintainingScrollPhysics(),
                         //画面幅を超えた時にスクロールできるように
                         shrinkWrap: true,
                         //listItemを上に配置
@@ -73,6 +66,8 @@ class _TalkPageState extends State<TalkPage> {
                             isMe: Authentication.myAccount!.id ==
                                 data["sender_id"],
                             sendTime: data["send_time"],
+                            userName: Authentication.myAccount!.name,
+                            recipient: data["recipient_id"],
                           );
                           return Padding(
                             padding: EdgeInsets.only(
@@ -95,7 +90,7 @@ class _TalkPageState extends State<TalkPage> {
                                                     .size
                                                     .width *
                                                 0.6),
-                                        padding: EdgeInsets.symmetric(
+                                        padding: const EdgeInsets.symmetric(
                                             horizontal: 10, vertical: 6),
                                         decoration: BoxDecoration(
                                           color: message.isMe
@@ -124,7 +119,7 @@ class _TalkPageState extends State<TalkPage> {
                                             child: widget.talkRoom.talkUser!
                                                         .imagePath ==
                                                     ""
-                                                ? Icon(
+                                                ? const Icon(
                                                     Icons.person, // 代替の人のアイコン
                                                     size: 40, // アイコンのサイズを調整できます
                                                     color: Colors
@@ -132,7 +127,7 @@ class _TalkPageState extends State<TalkPage> {
                                                   )
                                                 : null, // 画像がある場合はchildに何も表示しない
                                           ),
-                                          SizedBox(width: 5),
+                                          const SizedBox(width: 5),
                                           Container(
                                             constraints: BoxConstraints(
                                                 //最高幅を７割くらい
@@ -140,7 +135,7 @@ class _TalkPageState extends State<TalkPage> {
                                                         .size
                                                         .width *
                                                     0.6),
-                                            padding: EdgeInsets.symmetric(
+                                            padding: const EdgeInsets.symmetric(
                                                 horizontal: 10, vertical: 6),
                                             decoration: BoxDecoration(
                                               color: message.isMe
@@ -154,13 +149,13 @@ class _TalkPageState extends State<TalkPage> {
                                           ),
                                         ],
                                       ),
-                                SizedBox(
+                                const SizedBox(
                                   width: 10,
                                 ),
                                 Text(
                                   intl.DateFormat("HH:mm")
                                       .format(message.sendTime.toDate()),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontSize: 12, color: Colors.white),
                                 ),
                               ],
@@ -169,7 +164,7 @@ class _TalkPageState extends State<TalkPage> {
                         }),
                   );
                 } else {
-                  return Center(
+                  return const Center(
                     child: Text("メッセージがありません"),
                   );
                 }
@@ -181,7 +176,7 @@ class _TalkPageState extends State<TalkPage> {
               children: [
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                       left: 10.0,
                       right: 60,
                       bottom: 10,
@@ -195,12 +190,12 @@ class _TalkPageState extends State<TalkPage> {
                         hintText: "Type a message!",
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             width: 0,
                             style: BorderStyle.none,
                           ),
                         ),
-                        contentPadding: EdgeInsets.all(10),
+                        contentPadding: const EdgeInsets.all(10),
                       ),
                       onSubmitted: (text) async {
                         if (text.isNotEmpty) {
@@ -222,7 +217,7 @@ class _TalkPageState extends State<TalkPage> {
           Align(
             alignment: Alignment.bottomRight,
             child: Padding(
-              padding: EdgeInsets.only(right: 10.0, bottom: 14),
+              padding: const EdgeInsets.only(right: 10.0, bottom: 14),
               child: CircleAvatar(
                 backgroundColor: Colors.blue,
                 child: IconButton(
@@ -237,7 +232,7 @@ class _TalkPageState extends State<TalkPage> {
                       controller.clear();
                     }
                   },
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.send,
                     color: Colors.white,
                   ),

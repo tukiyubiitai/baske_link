@@ -1,18 +1,21 @@
 import 'dart:io';
 
-import 'package:basketball_app/utils/users_firebase.dart';
-import 'package:basketball_app/widgets/bottom_navigation.dart';
+import 'package:basketball_app/repository/users_firebase.dart';
+import 'package:basketball_app/screen/timeline/bottom_navigation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/account.dart';
-import '../../utils/progress_dialog.dart';
-import '../../utils/snackbar_utils.dart';
-import '../../widgets/popup_menu.dart';
+import '../../widgets/common_widgets/progress_dialog.dart';
+import '../../widgets/common_widgets/snackbar_utils.dart';
+import '../../widgets/user_widgets/popup_menu.dart';
 
 // 新規ユーザアカウントを作成するための画面
 
 class CreateAccountPage extends StatefulWidget {
+  const CreateAccountPage({super.key});
+
   @override
   State<CreateAccountPage> createState() => _CreateAccountPageState();
 }
@@ -22,12 +25,14 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   String nameErrorText = '';
   File? image;
   bool _isLoading = false;
+  final fcm = FirebaseMessaging.instance;
 
   void _saveAccount() async {
     setState(() {
       _isLoading = true;
     });
     final User? user = FirebaseAuth.instance.currentUser; // 現在のユーザーを取得
+    final registrationTokens = await fcm.getToken(); //トークンを取得
     final uid = user?.uid; // ユーザーのUIDを取得
     String? imagePath;
     try {
@@ -36,9 +41,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       setState(() {
         nameErrorText = name.isEmpty ? 'ユーザー名を入力してください' : '';
       });
-
-      print(name);
-      print(image);
 
       if (nameErrorText.isEmpty) {
         // ユーザー名と自己紹介が正常に入力された場合の処理
@@ -51,11 +53,12 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         Account newAccount = Account(
           id: uid!,
           name: name,
+          myToken: registrationTokens as String,
           imagePath: imagePath,
         );
 
-        var _result = await UserFirestore.setUser(newAccount);
-        if (_result == true) {
+        var result = await UserFirestore.setUser(newAccount);
+        if (result == true) {
           showSnackBar(
             context: context,
             text: "ユーザーが作成されました！",
@@ -66,7 +69,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
-              builder: (context) => MyStatefulWidget(
+              builder: (context) => BottomTabNavigator(
                 initialIndex: 3,
                 userId: '',
               ), // 登録されたユーザの情報を表示する画面
@@ -76,7 +79,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         }
       }
     } catch (e) {
-      print("エラーが発生しました $e");
+      print(e);
+      showErrorSnackBar(context: context, text: 'エラーが発生しました $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -95,7 +99,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
             appBar: AppBar(
               elevation: 0,
               backgroundColor: Colors.indigo[900],
-              title: Text(
+              title: const Text(
                 "新規アカウント作成",
                 style: TextStyle(color: Colors.white),
               ),
@@ -111,7 +115,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.only(
+                      borderRadius: const BorderRadius.only(
                         topRight: Radius.circular(60),
                         topLeft: Radius.circular(60),
                       ),
@@ -120,7 +124,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                           color: Colors.black.withOpacity(0.3),
                           spreadRadius: 3,
                           blurRadius: 10,
-                          offset: Offset(0, 1), // 影の位置調整
+                          offset: const Offset(0, 1), // 影の位置調整
                         ),
                       ],
                     ),
@@ -134,7 +138,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          SizedBox(
+                          const SizedBox(
                             height: 50,
                           ),
                           GestureDetector(
@@ -150,7 +154,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                                   });
                                 }
                               } catch (e) {
-                                print(e);
+                                showErrorSnackBar(
+                                    context: context, text: 'エラーが発生しました $e');
                               } finally {
                                 setState(() {
                                   _isLoading = false;
@@ -162,29 +167,29 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                               foregroundImage:
                                   image == null ? null : FileImage(image!),
                               radius: 60,
-                              child: Icon(
+                              child: const Icon(
                                 Icons.add_a_photo_outlined,
                                 color: Colors.blue,
                                 size: 40,
                               ),
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 30,
                           ),
-                          Container(
+                          SizedBox(
                             width: 300,
                             child: TextField(
                               maxLength: 10,
                               controller: nameController,
                               decoration: InputDecoration(
                                 hintText: "ユーザー名 (必須)",
-                                hintStyle: TextStyle(color: Colors.black),
+                                hintStyle: const TextStyle(color: Colors.black),
                                 errorText: nameErrorText.isNotEmpty
                                     ? nameErrorText
                                     : null,
                               ),
-                              style: TextStyle(
+                              style: const TextStyle(
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold),
                             ),
@@ -201,7 +206,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                              child: Text(
+                              child: const Text(
                                 "保存する",
                                 style: TextStyle(
                                   fontSize: 14,

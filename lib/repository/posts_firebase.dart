@@ -21,11 +21,11 @@ class PostFirestore {
       _firestoreInstance.collection('gamePosts');
 
   //チームメンバー募集投稿を保存
-  static Future<dynamic> TeamAddPost(TeamPost newTeamPost) async {
+  static Future<dynamic> teamAddPost(TeamPost newTeamPost) async {
     try {
       //サブコレクションを作成
       //_userPosts = my_posts
-      final CollectionReference _userPosts =
+      final CollectionReference userPosts =
           users.doc(newTeamPost.postAccountId).collection("my_posts");
 
       //teamPosts コレクションに新しいドキュメントとして保存されます。
@@ -51,7 +51,7 @@ class PostFirestore {
 
       //特定のユーザーの my_posts サブコレクション内の新しいドキュメントとして保存
       //result.id = teamPostに追加されたドキュメントID
-      _userPosts.doc(result.id).set({
+      userPosts.doc(result.id).set({
         "post_id": result.id,
         "location": newTeamPost.locationTagList,
         "created_time": Timestamp.now(),
@@ -79,9 +79,9 @@ class PostFirestore {
   }
 
   //練習試合の投稿を保存
-  static Future<dynamic> GameAddPost(GamePost newGamePost) async {
+  static Future<dynamic> gameAddPost(GamePost newGamePost) async {
     try {
-      final CollectionReference _userPosts =
+      final CollectionReference userPosts =
           users.doc(newGamePost.postAccountId).collection("my_game_posts");
       var result = await gamePosts.add({
         "post_account_id": newGamePost.postAccountId,
@@ -96,7 +96,7 @@ class PostFirestore {
         "note": newGamePost.note,
         "type": newGamePost.type,
       });
-      _userPosts.doc(result.id).set({
+      userPosts.doc(result.id).set({
         "post_id": result.id,
         "locationTagList": newGamePost.locationTagList,
         "prefecture": newGamePost.prefecture,
@@ -231,10 +231,10 @@ class PostFirestore {
       });
 
       // ユーザーの投稿も更新
-      final CollectionReference _userPosts =
+      final CollectionReference userPosts =
           users.doc(updatedPost.postAccountId).collection("my_posts");
 
-      await _userPosts.doc(postId).update({
+      await userPosts.doc(postId).update({
         "location": updatedPost.locationTagList,
         "prefecture": updatedPost.prefecture,
         "goal": updatedPost.goal,
@@ -281,10 +281,10 @@ class PostFirestore {
       });
 
       // ユーザーの投稿も更新
-      final CollectionReference _userPosts =
+      final CollectionReference userPosts =
           users.doc(updatedPost.postAccountId).collection("my_game_posts");
 
-      await _userPosts.doc(postId).update({
+      await userPosts.doc(postId).update({
         "post_account_id": updatedPost.postAccountId,
         "locationTagList": updatedPost.locationTagList,
         "prefecture": updatedPost.prefecture,
@@ -413,7 +413,7 @@ class PostFirestore {
 
   //ドキュメントidから一致する投稿を取得する
   static Future<List<GamePost>?> getGamePostFromIds(String postId) async {
-    List<GamePost> GamePostList = [];
+    List<GamePost> gamePostList = [];
     try {
       QuerySnapshot querySnapshot =
           await gamePosts.where(FieldPath.documentId, isEqualTo: postId).get();
@@ -434,13 +434,31 @@ class PostFirestore {
             imageUrl: data["imageUrl"],
             note: data["note"],
             type: 'game');
-        GamePostList.add(post);
+        gamePostList.add(post);
       }
       print("自分の投稿を取得完了");
-      return GamePostList;
+      return gamePostList;
     } on FirebaseException catch (e) {
       print("投稿取得エラー: $e");
       return null;
+    }
+  }
+
+  //画像をアップロード
+  static Future<String?> uploadImage(
+      String? imagePath, String? defaultValue) async {
+    if (imagePath != null) {
+      //新しく画像を追加した場合
+      if (defaultValue != null) {
+        //古い画像をstorageから削除
+        await PostFirestore().deletePhotoData(defaultValue);
+      }
+      //新しく画像を追加した場合をupload
+      return await PostFirestore.uploadImageFromPathToFirebaseStorage(
+          imagePath);
+    } else {
+      //新しく画像がない場合は元々の画像を返す
+      return defaultValue;
     }
   }
 
@@ -457,7 +475,7 @@ class PostFirestore {
 
       // アップロードする画像ファイルのパスを指定
       Reference referenceDirImages =
-          referenceRoot.child('images/${uniqueFileName}');
+          referenceRoot.child('images/$uniqueFileName');
 
       // 画像ファイルをアップロード
       await referenceDirImages.putFile(imageFile);
@@ -473,21 +491,25 @@ class PostFirestore {
   }
 
   // Firebase Storageから画像を削除
-  Future<void> deleteImageFromStorage(String imagePath) async {
+  Future<void> deletePhotoData(String url) async {
     try {
-      Reference referenceRoot = FirebaseStorage.instance.ref();
-      Reference storageReference = referenceRoot.child('images/');
+      final storageReference = FirebaseStorage.instance.refFromURL(url);
       await storageReference.delete();
-      print('Image deleted from Firebase Storage.');
     } catch (e) {
-      print('Error deleting image from Firebase Storage: $e');
+      print(e);
     }
   }
 
   //投稿IDから一致するTeamPostsの投稿とusersサブコレクションmy_postsのを削除
-  Future<void> deleteTeamPostsByPostId(
-      String postId, String myAccountId) async {
+  Future<void> deleteTeamPostsByPostId(String postId, String myAccountId,
+      String imageUrl, String headerUrl) async {
     try {
+      if (imageUrl.isNotEmpty) {
+        await PostFirestore().deletePhotoData(imageUrl.toString());
+      }
+      if (headerUrl.isNotEmpty) {
+        await PostFirestore().deletePhotoData(headerUrl.toString());
+      }
       QuerySnapshot querySnapshot = await teamPosts.get();
 
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
@@ -522,8 +544,11 @@ class PostFirestore {
 
   //投稿IDから一致するGamePostsの投稿を削除とusersサブコレクションmy_game_postsのを削除
   Future<void> deleteGamePostsByPostId(
-      String postId, String myAccountId) async {
+      String postId, String myAccountId, String imageUrl) async {
     try {
+      if (imageUrl.isNotEmpty) {
+        await PostFirestore().deletePhotoData(imageUrl.toString());
+      }
       QuerySnapshot querySnapshot = await gamePosts.get();
 
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {

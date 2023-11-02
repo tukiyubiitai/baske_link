@@ -1,7 +1,7 @@
 // フラグタイムのウィジェットを生成するためのヘルパークラス
 import 'package:flutter/material.dart';
 
-import '../screen/post/team_post_page.dart';
+import '../../screen/post/team_post_page.dart';
 
 class FilterFunctions {
   // フィルターチップを生成するメソッド
@@ -35,7 +35,6 @@ class FilterFunctions {
           }
           // 外部で指定されたコールバック関数を使ってフィルターを更新
           updateFilters(updatedFilters);
-          print(updatedFilters); // 更新されたフィルターを出力
         },
       );
     }

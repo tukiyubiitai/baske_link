@@ -1,35 +1,41 @@
-import 'package:basketball_app/screen/signin/login_page.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:basketball_app/providers/map_provider.dart';
+import 'package:basketball_app/providers/tag_provider.dart';
+import 'package:basketball_app/screen/authentication/authentication_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'firebase_options.dart';
-import 'models/model/map_model.dart';
-import 'providers/great_places.dart';
+import 'providers/area_provider.dart';
 
-void main() async {
-  //追記するコード
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+void main() {
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<MapProvider>(
+          create: (context) => MapProvider(),
+        ),
+        ChangeNotifierProvider<TagProvider>(
+          create: (context) => TagProvider(),
+        ),
+        ChangeNotifierProvider<AreaProvider>(
+          create: (context) => AreaProvider(),
+        ),
+      ],
+      child: const MyApp(),
+    ),
   );
-  runApp(ChangeNotifierProvider<MapModel>(
-    create: (context) => MapModel(),
-    child: MyApp(),
-  ));
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: GreatPlaces(),
-      child: MaterialApp(
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: LoginPage(),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
+      home: const LoginAndSignupPage(),
     );
   }
 }

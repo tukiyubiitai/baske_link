@@ -3,9 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import '../utils/authentication.dart';
+import '../../utils/authentication.dart';
 
 class GoogleSignInButton extends StatefulWidget {
+  const GoogleSignInButton({super.key});
+
   @override
   _GoogleSignInButtonState createState() => _GoogleSignInButtonState();
 }
@@ -18,7 +20,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: _isSigningIn
-          ? CircularProgressIndicator(
+          ? const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             )
           : OutlinedButton(
@@ -44,7 +46,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                 if (user != null) {
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                      builder: (context) => BottomTabNavigator(
+                      builder: (context) => const BottomTabNavigator(
                         initialIndex: 0,
                         userId: '',
                       ),
@@ -52,15 +54,15 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                   );
                 }
               },
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+              child: const Padding(
+                padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Icon(FontAwesomeIcons.google),
                     Padding(
-                      padding: const EdgeInsets.only(left: 10),
+                      padding: EdgeInsets.only(left: 10),
                       child: Text(
                         'Sign in with Google',
                         style: TextStyle(

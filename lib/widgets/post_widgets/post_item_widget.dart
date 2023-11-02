@@ -1,10 +1,10 @@
 import 'package:basketball_app/screen/post/post_detail_page.dart';
-import 'package:basketball_app/widgets/post_list_widgets.dart';
+import 'package:basketball_app/widgets/post_widgets/post_list_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/account.dart';
-import '../../widgets/account_circle.dart';
+import '../user_widgets/account_circle.dart';
 
 //チーム募集 TeamListItemWidget
 class TeamListItemWidget extends StatefulWidget {
@@ -13,7 +13,8 @@ class TeamListItemWidget extends StatefulWidget {
 
   final Account postAccountData;
 
-  TeamListItemWidget({
+  const TeamListItemWidget({
+    super.key,
     required this.recruitment,
     required this.postId,
     required this.postAccountData,
@@ -44,7 +45,7 @@ class _TeamListItemWidgetState extends State<TeamListItemWidget> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
             color: Colors.white,
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black26,
                 blurRadius: 5,
@@ -55,7 +56,7 @@ class _TeamListItemWidgetState extends State<TeamListItemWidget> {
           child: Stack(
             children: [
               ClipRRect(
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(10),
                     topRight: Radius.circular(10),
                   ),
@@ -79,31 +80,31 @@ class _TeamListItemWidgetState extends State<TeamListItemWidget> {
                           ),
                   )),
               Padding(
-                padding: EdgeInsets.only(right: 10.0),
+                padding: const EdgeInsets.only(right: 10.0),
                 child: Column(
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         ClipRRect(
-                          borderRadius: BorderRadius.only(
+                          borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(10),
                           ),
                           child: Container(
                             height: 40,
                             width: 60,
+                            decoration: const BoxDecoration(
+                              color: Colors.indigo,
+                            ),
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
                                 widget.recruitment["prefecture"],
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.indigo,
                             ),
                           ),
                         ),
@@ -113,7 +114,7 @@ class _TeamListItemWidgetState extends State<TeamListItemWidget> {
                               children: [
                                 Text(
                                   "更新日：$formattedCreatedAt",
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),
                                 ),
@@ -145,14 +146,14 @@ class _TeamListItemWidgetState extends State<TeamListItemWidget> {
                             children: [
                               Text(
                                 widget.recruitment["teamName"],
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 20,
                                     color: Colors.black),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 height: 20,
                               ),
                               Row(
@@ -160,7 +161,7 @@ class _TeamListItemWidgetState extends State<TeamListItemWidget> {
                                   Expanded(
                                     child: Text(
                                       widget.recruitment["searchCriteria"],
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           fontWeight: FontWeight.w500,
                                           fontSize: 16),
                                     ),
@@ -169,89 +170,89 @@ class _TeamListItemWidgetState extends State<TeamListItemWidget> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Container(
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
                                     color: Colors.black12, width: 1.0), // 下線
                               ),
                             ),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           PostIconWithText(
                             icon: Icons.location_on,
                             text: locationList.join(", "),
                             color: Colors.indigo,
                             fontWeight: FontWeight.w600,
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Container(
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
                                     color: Colors.black12, width: 1.0), // 下線
                               ),
                             ),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           PostIconWithText(
                             icon: Icons.calendar_month,
                             text: widget.recruitment["activityTime"],
                             color: Colors.black,
                             fontWeight: FontWeight.w500,
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Container(
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
                                     color: Colors.black12, width: 1.0), // 下線
                               ),
                             ),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           PostIconWithText(
                             icon: Icons.group_add,
                             text: ageList.join(', '),
                             color: Colors.black,
                             fontWeight: FontWeight.w500,
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Container(
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
                                     color: Colors.black12, width: 1.0), // 下線
                               ),
                             ),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           PostIconWithList(
                             icon: Icons.groups,
                             list: targetList,
                             color: Colors.indigo,
                             fontWeight: FontWeight.w600,
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Container(
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
                                     color: Colors.black12, width: 1.0), // 下線
                               ),
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 20,
                           ),
-                          Text(
+                          const Text(
                             "投稿者",
                             style: TextStyle(
                                 color: Colors.orange,
                                 fontWeight: FontWeight.w600),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 5,
                           ),
                           Row(
@@ -261,7 +262,7 @@ class _TeamListItemWidgetState extends State<TeamListItemWidget> {
                                   ? Container(
                                       width: 60,
                                       height: 60,
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         shape: BoxShape.circle,
                                       ),
                                       child: CircleAvatar(
@@ -275,22 +276,22 @@ class _TeamListItemWidgetState extends State<TeamListItemWidget> {
                                   : Container(
                                       width: 60,
                                       height: 60,
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         shape: BoxShape.circle,
                                       ),
-                                      child: CircleAvatar(
+                                      child: const CircleAvatar(
                                         radius: 50,
                                         foregroundImage: AssetImage(
-                                          'assets/images/headerImage.jpg',
+                                          'assets/images/basketball_icon.png',
                                         ),
                                       ),
                                     ),
-                              SizedBox(
+                              const SizedBox(
                                 width: 10,
                               ),
                               Text(
                                 widget.postAccountData.name,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15),
@@ -300,7 +301,6 @@ class _TeamListItemWidgetState extends State<TeamListItemWidget> {
                           Center(
                             child: TextButton(
                               onPressed: () {
-                                print(widget.postId);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -311,7 +311,7 @@ class _TeamListItemWidgetState extends State<TeamListItemWidget> {
                                   ),
                                 );
                               },
-                              child: Text(
+                              child: const Text(
                                 "詳細を見る",
                                 style: TextStyle(
                                     fontSize: 14, fontWeight: FontWeight.bold),
@@ -341,7 +341,8 @@ class GameListItemWidget extends StatefulWidget {
   final Map<String, dynamic> recruitment;
   final Account postAccountData;
 
-  GameListItemWidget({
+  const GameListItemWidget({
+    super.key,
     required this.postId,
     required this.recruitment,
     required this.postAccountData,
@@ -371,7 +372,7 @@ class _GameListItemWidgetState extends State<GameListItemWidget> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
             color: Colors.white,
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black26,
                 blurRadius: 5,
@@ -382,7 +383,7 @@ class _GameListItemWidgetState extends State<GameListItemWidget> {
           child: Stack(
             children: [
               ClipRRect(
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(10),
                     topRight: Radius.circular(10),
                   ),
@@ -406,31 +407,31 @@ class _GameListItemWidgetState extends State<GameListItemWidget> {
                           ),
                   )),
               Padding(
-                padding: EdgeInsets.only(right: 10.0),
+                padding: const EdgeInsets.only(right: 10.0),
                 child: Column(
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         ClipRRect(
-                          borderRadius: BorderRadius.only(
+                          borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(10),
                           ),
                           child: Container(
                             height: 40,
                             width: 60,
+                            decoration: const BoxDecoration(
+                              color: Colors.orange,
+                            ),
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
                                 widget.recruitment["prefecture"],
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.orange,
                             ),
                           ),
                         ),
@@ -438,7 +439,7 @@ class _GameListItemWidgetState extends State<GameListItemWidget> {
                           children: [
                             Text(
                               "更新日：$formattedCreatedAt",
-                              style: TextStyle(
+                              style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold),
                             ),
@@ -461,88 +462,88 @@ class _GameListItemWidgetState extends State<GameListItemWidget> {
                           Center(
                             child: Text(
                               widget.recruitment["teamName"],
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 20),
                             ),
                           ),
-                          SizedBox(height: 20),
+                          const SizedBox(height: 20),
                           Container(
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
                                     color: Colors.black12, width: 1.0), // 下線
                               ),
                             ),
                           ),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           PostIconWithText(
                             icon: Icons.location_on,
                             text: locationTagList.join(", "),
                             color: Colors.indigo,
                             fontWeight: FontWeight.w600,
                           ),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           Container(
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
                                     color: Colors.black12, width: 1.0), // 下線
                               ),
                             ),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           PostIconWithText(
                             icon: Icons.group_add,
                             text: ageList.join(', '),
                             color: Colors.black,
                             fontWeight: FontWeight.w500,
                           ),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           Container(
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
                                     color: Colors.black12, width: 1.0), // 下線
                               ),
                             ),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           PostIconWithText(
                             color: Colors.black,
                             icon: Icons.groups,
                             text: widget.recruitment["member"],
                             fontWeight: FontWeight.w500,
                           ),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           Container(
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
                                     color: Colors.black12, width: 1.0), // 下線
                               ),
                             ),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           LevelTextWidgets(level: widget.recruitment["level"]),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           Container(
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
                                     color: Colors.black12, width: 1.0), // 下線
                               ),
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 20,
                           ),
-                          Text(
+                          const Text(
                             "投稿者",
                             style: TextStyle(
                                 color: Colors.orange,
                                 fontWeight: FontWeight.w600),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 5,
                           ),
                           Row(
@@ -552,7 +553,7 @@ class _GameListItemWidgetState extends State<GameListItemWidget> {
                                   ? Container(
                                       width: 60,
                                       height: 60,
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         shape: BoxShape.circle,
                                       ),
                                       child: CircleAvatar(
@@ -566,22 +567,22 @@ class _GameListItemWidgetState extends State<GameListItemWidget> {
                                   : Container(
                                       width: 60,
                                       height: 60,
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         shape: BoxShape.circle,
                                       ),
-                                      child: CircleAvatar(
+                                      child: const CircleAvatar(
                                         radius: 50,
                                         foregroundImage: AssetImage(
-                                          'assets/images/headerImage.jpg',
+                                          'assets/images/basketball_icon.png',
                                         ),
                                       ),
                                     ),
-                              SizedBox(
+                              const SizedBox(
                                 width: 10,
                               ),
                               Text(
                                 widget.postAccountData.name,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.bold),
                               )
@@ -600,7 +601,7 @@ class _GameListItemWidgetState extends State<GameListItemWidget> {
                                   ),
                                 );
                               },
-                              child: Text(
+                              child: const Text(
                                 "詳細を見る",
                                 style: TextStyle(
                                     fontSize: 14, fontWeight: FontWeight.bold),

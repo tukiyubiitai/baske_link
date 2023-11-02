@@ -1,8 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:basketball_app/utils/posts_firebase.dart';
-import 'package:basketball_app/utils/snackbar_utils.dart';
-import 'package:basketball_app/widgets/image_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -12,20 +9,23 @@ import 'package:provider/provider.dart';
 import '../../data/chip_Item.dart';
 import '../../models/account.dart';
 import '../../models/team_model.dart';
-import '../../providers/area_Provider.dart';
-import '../../providers/tag_Provider.dart';
+import '../../providers/area_provider.dart';
+import '../../providers/tag_provider.dart';
+import '../../repository/posts_firebase.dart';
 import '../../utils/authentication.dart';
-import '../../utils/progress_dialog.dart';
-import '../../widgets/custom_text_field.dart';
-import '../../widgets/filter_functions.dart';
-import '../../widgets/tag_chips_provider.dart';
+import '../../widgets/common_widgets/progress_dialog.dart';
+import '../../widgets/common_widgets/snackbar_utils.dart';
+import '../../widgets/post_widgets/custom_text_field.dart';
+import '../../widgets/post_widgets/filter_functions.dart';
+import '../../widgets/post_widgets/post_image_widget.dart';
+import '../../widgets/post_widgets/tag_chips_widget.dart';
 
 class TeamPostPage extends StatefulWidget {
   final bool isEditing; //編集モード
 
   final String? postId;
 
-  TeamPostPage({required this.isEditing, this.postId});
+  const TeamPostPage({super.key, required this.isEditing, this.postId});
 
   @override
   State<TeamPostPage> createState() => _TeamPostPageState();
@@ -115,7 +115,7 @@ class _TeamPostPageState extends State<TeamPostPage> {
         }
       }
     } catch (e) {
-      print("エラーが発生しました： $e");
+      showErrorSnackBar(context: context, text: 'エラーが発生しました $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -160,8 +160,9 @@ class _TeamPostPageState extends State<TeamPostPage> {
         return;
       }
       List<String> prefectureAndLocation = [...tagStrings, selectedValue];
-      String? headerUrl = await _uploadImage(headerImagePath, post.headerUrl);
-      String? url = await _uploadImage(imagePath, post.imageUrl);
+      String? headerUrl =
+          await PostFirestore.uploadImage(headerImagePath, post.headerUrl);
+      String? url = await PostFirestore.uploadImage(imagePath, post.imageUrl);
       String id = post.id;
       TeamPost updatePost = TeamPost(
         postAccountId: myAccount.id,
@@ -195,7 +196,6 @@ class _TeamPostPageState extends State<TeamPostPage> {
       }
     } catch (e) {
       showErrorSnackBar(context: context, text: 'エラーが発生しました。もう一度お試しください。');
-      print("以下のエラーが起こりました： $e");
     } finally {
       setState(() {
         _isLoading = false;
@@ -230,10 +230,11 @@ class _TeamPostPageState extends State<TeamPostPage> {
       }
       List<String> prefectureAndLocation = [...tagStrings, selectedValue];
       // ヘッダー画像をアップロードしてURLを取得
-      final String? headerUrl = await _uploadImage(headerImagePath, null);
+      final String? headerUrl =
+          await PostFirestore.uploadImage(headerImagePath, null);
 
       // 通常の画像をアップロードしてURLを取得
-      final String? url = await _uploadImage(imagePath, null);
+      final String? url = await PostFirestore.uploadImage(imagePath, null);
 
       TeamPost newPost = TeamPost(
         postAccountId: myAccount.id,
@@ -255,7 +256,7 @@ class _TeamPostPageState extends State<TeamPostPage> {
         type: 'team',
       );
 
-      var result = await PostFirestore.TeamAddPost(newPost);
+      var result = await PostFirestore.teamAddPost(newPost);
       if (result == true) {
         showSnackBar(
           context: context,
@@ -266,21 +267,11 @@ class _TeamPostPageState extends State<TeamPostPage> {
         Navigator.popUntil(context, (route) => route.isFirst);
       }
     } catch (e) {
-      print("以下のエラーが起こりました： $e");
       showErrorSnackBar(context: context, text: 'エラーが発生しました。もう一度お試しください。');
     } finally {
       setState(() {
         _isLoading = false;
       });
-    }
-  }
-
-  Future<String?> _uploadImage(String? imagePath, String? defaultValue) async {
-    if (imagePath != null) {
-      return await PostFirestore.uploadImageFromPathToFirebaseStorage(
-          imagePath);
-    } else {
-      return defaultValue;
     }
   }
 
@@ -323,7 +314,7 @@ class _TeamPostPageState extends State<TeamPostPage> {
                         },
                   child: Text(
                     widget.isEditing ? '投稿を更新する' : '投稿する',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
@@ -347,7 +338,7 @@ class _TeamPostPageState extends State<TeamPostPage> {
                         validator: _validateRequiredField,
                         icon: Icons.diversity_3,
                       ),
-                      SizedBox(height: 10.0),
+                      const SizedBox(height: 10.0),
                       RequiredCustomTextField(
                         label: '活動時間',
                         hintText: '活動時間を入力してください',
@@ -355,8 +346,8 @@ class _TeamPostPageState extends State<TeamPostPage> {
                         validator: _validateRequiredField,
                         icon: Icons.event,
                       ),
-                      SizedBox(height: 20.0),
-                      Row(
+                      const SizedBox(height: 20.0),
+                      const Row(
                         children: [
                           Text.rich(
                             TextSpan(
@@ -379,11 +370,11 @@ class _TeamPostPageState extends State<TeamPostPage> {
                           ),
                         ],
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       //活動時間
-                      Row(
+                      const Row(
                         children: [
                           Expanded(
                             //場所と場所のタグを追加するwidget
@@ -391,7 +382,7 @@ class _TeamPostPageState extends State<TeamPostPage> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
                       CustomTextField(
                         controller: _goalController,
                         labelText: "チーム目標",
@@ -414,14 +405,14 @@ class _TeamPostPageState extends State<TeamPostPage> {
                         prefixIcon: Icons.currency_yen,
                         maxLength: 20,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       CustomTextRich(
                         mainText: '年齢層',
                         optionalText: '(複数可)',
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       Container(
@@ -447,14 +438,14 @@ class _TeamPostPageState extends State<TeamPostPage> {
                           ),
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       CustomTextRich(
                         mainText: '募集内容',
                         optionalText: '(複数可)',
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       Container(
@@ -479,7 +470,7 @@ class _TeamPostPageState extends State<TeamPostPage> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 16.0),
+                      const SizedBox(height: 16.0),
                       //ヘッダー画像
                       HeaderImageInput(
                         headerImageBytes: headerImageBytes,
@@ -494,7 +485,7 @@ class _TeamPostPageState extends State<TeamPostPage> {
                           });
                         },
                       ),
-                      SizedBox(height: 16.0),
+                      const SizedBox(height: 16.0),
                       //画像
                       ImageInput(
                         imageBytes: imageBytes,
@@ -509,26 +500,11 @@ class _TeamPostPageState extends State<TeamPostPage> {
                           });
                         },
                       ),
-                      SizedBox(height: 16.0),
+                      const SizedBox(height: 16.0),
                       NoteCustomTextField(
                         labelText: 'アピールポイント・連絡事項',
                         controller: _noteController,
                       ),
-
-                      SizedBox(height: 30.0),
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          child: Text(
-                            '投稿する',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 30.0),
                     ],
                   ),
                 ),

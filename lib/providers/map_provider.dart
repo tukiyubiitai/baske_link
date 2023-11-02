@@ -1,65 +1,100 @@
-import 'dart:convert';
+import 'package:flutter/cupertino.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+class MapProvider extends ChangeNotifier {
+  GoogleMapController? _mapController;
 
-class MapModel extends ChangeNotifier {
-  List<String> urls = [];
-  List<String> bodyUrls = [];
+  GoogleMapController? get mapController => _mapController;
 
-  Future<void> fetchPhoto(String placeId) async {
-    //Google Maps Places APIの詳細情報を取得
-    // placeRes --> APIからのレスポンス
-    final placeRes = await http.get(Uri.parse(
-        'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=AIzaSyBRtf8M-zYgPr9sTX6Fy3JWoml6FQne5Jc&language=ja'));
+  final List<String> _urls = []; //コート画像
+  final List<String> _bodyUrls = []; //コート詳細画像
 
-    // placeResのbodyに含まれるJSONデータを解析し、Map<String, dynamic>型のplaceDataに格納
-    final Map<String, dynamic> placeData = jsonDecode(placeRes.body);
+  Position? _currentPosition; //現在地
+  Position? get currentPosition => _currentPosition;
 
-    //画像がなかった場合の処理
-    if (placeData["result"] == null ||
-        placeData["result"]["photos"] == null ||
-        placeData["result"]["photos"].isEmpty) {
-      urls.add(
-          "https://www.shoshinsha-design.com/wp-content/uploads/2020/05/noimage-760x460.png");
-      notifyListeners();
-      return;
-    }
+  final Map<String, Marker> _markers = {}; //マーカー
+  final List<String> _addressList = []; //住所
+  Uri? _mapURL; //マップのURL
+  int? _selectCourt; //選択されたコート
+  bool _loadMarkers = false; //ロード中かどうか
 
-    final List photos = placeData["result"]["photos"];
+  Map<String, Marker> get markers => _markers;
 
-    //photosリストから、最初の写真のphoto_referenceを取得
-    //写真のリストの先頭だけ取得
-    final photo_reference = photos[0]['photo_reference'];
-    final url =
-        "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photo_reference&key=AIzaSyBRtf8M-zYgPr9sTX6Fy3JWoml6FQne5Jc&language=ja";
-    urls.add(url);
+  List<String> get addressList => _addressList;
+
+  List<String> get urls => _urls;
+
+  List<String> get bodyUrls => _bodyUrls;
+
+  Uri? get mapURL => _mapURL;
+
+  int? get selectCourt => _selectCourt;
+
+  bool get loadMarkers => _loadMarkers;
+
+  void setLoadMarkers(bool value) {
+    _loadMarkers = value;
     notifyListeners();
   }
 
-  Future<void> fetchDetailPhoto(String placeId) async {
-    final placeRes = await http.get(Uri.parse(
-        'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=AIzaSyBRtf8M-zYgPr9sTX6Fy3JWoml6FQne5Jc'));
-    final Map<String, dynamic> placeData = jsonDecode(placeRes.body);
-    if (placeData["result"] == null || placeData["result"]["photos"] == null) {
-      bodyUrls.add(
-          "https://www.shoshinsha-design.com/wp-content/uploads/2020/05/noimage-760x460.png");
-      notifyListeners();
-      return;
-    }
-    final List photos = placeData["result"]["photos"];
-    if (photos.isEmpty) {
-      bodyUrls.add(
-          "https://www.shoshinsha-design.com/wp-content/uploads/2020/05/noimage-760x460.png");
-      notifyListeners();
-      return;
-    }
-    for (final photo in photos) {
-      final photo_reference = photo['photo_reference'];
-      final url =
-          "https://maps.googleapis.com/maps/api/place/photo?maxwidth=700&photoreference=$photo_reference&key=AIzaSyBRtf8M-zYgPr9sTX6Fy3JWoml6FQne5Jc";
-      bodyUrls.add(url);
-    }
+  void selectIndex(int index) {
+    _selectCourt = index;
+    notifyListeners();
+  }
+
+  void clearSelect() {
+    _selectCourt = null;
+    notifyListeners();
+  }
+
+  void addCurrentPosition(Position position) {
+    _currentPosition = position;
+    notifyListeners();
+  }
+
+  void addAddress(String address) {
+    _addressList.add(address);
+    notifyListeners();
+  }
+
+  void addMaker(String placeId, Marker marker) {
+    _markers[placeId] = marker;
+    notifyListeners();
+  }
+
+  void addMapController(GoogleMapController controller) {
+    _mapController = controller;
+    notifyListeners();
+  }
+
+  void addUrls(String url) {
+    _urls.add(url);
+    notifyListeners();
+  }
+
+  void addBodyUrl(String url) {
+    _bodyUrls.add(url);
+    notifyListeners();
+  }
+
+  void clearUrls() {
+    _urls.clear();
+    notifyListeners();
+  }
+
+  void clearMakers() {
+    _markers.clear();
+    notifyListeners();
+  }
+
+  set addMapUrl(Uri uri) {
+    _mapURL = uri;
+    notifyListeners();
+  }
+
+  void clearBodyUrls() {
+    _bodyUrls.clear();
     notifyListeners();
   }
 }

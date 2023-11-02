@@ -1,97 +1,251 @@
-import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:basketball_app/models/model/practice_post.dart';
-import 'package:basketball_app/utils/posts.dart';
-import 'package:basketball_app/utils/users.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:provider/provider.dart';
 
+import '../../data/chip_Item.dart';
+import '../../models/account.dart';
+import '../../models/game_model.dart';
+import '../../providers/area_provider.dart';
+import '../../providers/tag_provider.dart';
+import '../../repository/posts_firebase.dart';
 import '../../utils/authentication.dart';
-import '../../widgets/dropdown_widget.dart';
+import '../../widgets/common_widgets/progress_dialog.dart';
+import '../../widgets/common_widgets/snackbar_utils.dart';
+import '../../widgets/post_widgets/custom_text_field.dart';
+import '../../widgets/post_widgets/filter_functions.dart';
+import '../../widgets/post_widgets/post_image_widget.dart';
+import '../../widgets/post_widgets/tag_chips_widget.dart';
 
-class PracticeGamePage extends StatefulWidget {
+class GamePostPage extends StatefulWidget {
+  final bool isEditing; //編集モード
+  final String? postId;
+
+  const GamePostPage({super.key, required this.isEditing, this.postId});
+
   @override
-  State<PracticeGamePage> createState() => _PracticeGamePageState();
+  State<GamePostPage> createState() => _GamePostPageState();
 }
 
-class _PracticeGamePageState extends State<PracticeGamePage> {
+class _GamePostPageState extends State<GamePostPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final FirebaseStorage storage = FirebaseStorage.instance;
 
-  File? _storeImage; //画像
-  String? imageUrl; //画像URL
-  String? _selectedDropdownValue; // 選択されたアイテム
-  final picker = ImagePicker();
+  int? integerValue;
 
   late DatabaseReference dbRef;
 
+  Uint8List? imageBytes;
+  String? imagePath;
+
+  final Account myAccount = Authentication.myAccount!;
+
   // 必須項目のフォームのコントローラー
-  final TextEditingController _dateTimeController = TextEditingController();
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _levelController = TextEditingController();
-  final TextEditingController _averageAgeController = TextEditingController();
+  final TextEditingController _memberController = TextEditingController();
+  final TextEditingController _teamNameController = TextEditingController();
 
   //非必須項目のフォームのコントローラー
   final TextEditingController _noteController = TextEditingController();
+
+  List<String> _ageFilters = [];
+  bool _isLoading = false;
+  late GamePost post; //投稿を編集する時に保存された情報が入ってくる
+
+  bool _validateRequiredFields() {
+    return _teamNameController.text.isNotEmpty &&
+        _teamNameController.text.isNotEmpty &&
+        _ageFilters.isNotEmpty &&
+        integerValue != null;
+  }
 
   @override
   void initState() {
     super.initState();
     dbRef = FirebaseDatabase.instance.ref().child('Recruitment');
-  }
-
-  //画像のアップロード
-  Future<String?> _uploadImage(File _storeImage) async {
-    String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
-    Reference referenceRoot = FirebaseStorage.instance.ref();
-    Reference referenceDirImages =
-        referenceRoot.child('images/${uniqueFileName}');
-    try {
-      // Store the file
-      await referenceDirImages.putFile(File(_storeImage.path));
-      // Success: get the download URL
-      String downloadUrl = await referenceDirImages.getDownloadURL();
-      return downloadUrl;
-    } catch (error) {
-      print('Error uploading image: $error');
-      return null;
+    if (widget.isEditing == true) {
+      _loadPosts(); //投稿を呼び出す
     }
   }
 
-  //Firestoreに投稿を保存します
-  Future<void> _submitRecruitment() async {
-    // 画像をアップロードしてURLを取得
-    final String? url =
-        _storeImage != null ? await _uploadImage(_storeImage!) : null;
+  //投稿を編集する際にfirestoreにある情報を読み込む
+  Future<void> _loadPosts() async {
+    setState(() {
+      _isLoading = true;
+    });
 
-    String uid = FirebaseAuth.instance.currentUser!.uid; // ログインしているユーザーのUIDを取得
-    bool userLoaded = await UserFirestore.getUser(uid); // ユーザー情報を取得
+    try {
+      final loadedPosts =
+          await PostFirestore.getGamePostFromIds(widget.postId as String);
+      final tagModel = Provider.of<TagProvider>(context, listen: false);
+      final areaModel = Provider.of<AreaProvider>(context, listen: false);
 
-    if (userLoaded) {
-      {
-        String postAccountId = Authentication.myAccount!.id; // ユーザーのuserIdを取得
+      if (loadedPosts != null && loadedPosts.isNotEmpty) {
+        post = loadedPosts[0];
 
-        GamePost newGamePost = GamePost(
-          postAccountId: postAccountId,
-          location: _selectedDropdownValue.toString(),
-          activityTime: _dateTimeController.text,
-          averageAge: _averageAgeController.text,
-          prefecture: _addressController.text,
-          teamName: _titleController.text,
-          recruitNumber: _averageAgeController.text,
-          level: _levelController.text,
-          note: _noteController.text,
-          imageUrl: url,
-        );
-        var result = await PostFirestore.GameAddPost(newGamePost);
-        if (result == true) {
-          Navigator.pop(context);
+        _memberController.text = post.member;
+        _teamNameController.text = post.teamName;
+        _ageFilters = post.ageList;
+        _noteController.text = post.note ?? "";
+        integerValue = post.level;
+
+        for (String location in post.locationTagList) {
+          tagModel.addTag(location);
+        }
+
+        areaModel.setSelectedValue(post.prefecture);
+
+        if (post.imageUrl != null) {
+          Reference imageRef =
+              FirebaseStorage.instance.refFromURL(post.imageUrl as String);
+          imageBytes = (await imageRef.getData())!;
         }
       }
+    } catch (e) {
+      // エラーハンドリング
+      showErrorSnackBar(context: context, text: 'エラーが発生しました $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _memberController.dispose();
+    _teamNameController.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  //投稿をfirestoreに保存
+  Future<void> _submitRecruitment() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final tagModel = Provider.of<TagProvider>(context, listen: false);
+      final List<String> tagStrings = tagModel.tagStrings;
+      final areaModel = Provider.of<AreaProvider>(context, listen: false);
+      final String selectedValue = areaModel.selectedValue.toString();
+      if (!_validateRequiredFields()) {
+        showErrorSnackBar(context: context, text: '必須項目が入力されていません');
+        _validateRequiredField('必須項目が入力されていません');
+        return;
+      }
+      if (tagStrings.isEmpty || selectedValue.isEmpty) {
+        if (tagStrings.isEmpty) {
+          tagModel.checkAndSetErrorBorder();
+          showErrorSnackBar(context: context, text: 'タグが追加が追加されていません');
+          return;
+        }
+        showErrorSnackBar(context: context, text: 'エリアが選択されていません');
+        return;
+      }
+      String? url = await PostFirestore.uploadImage(imagePath, null);
+      String postAccountId = Authentication.myAccount!.id; // ユーザーのuserIdを取得
+      GamePost newGamePost = GamePost(
+        postAccountId: postAccountId,
+        locationTagList: tagStrings,
+        prefecture: selectedValue,
+        teamName: _teamNameController.text,
+        createdTime: Timestamp.now(),
+        imageUrl: url,
+        note: _noteController.text,
+        level: integerValue!,
+        member: _memberController.text,
+        ageList: _ageFilters,
+        type: 'game',
+      );
+      var result = await PostFirestore.gameAddPost(newGamePost);
+      if (result == true) {
+        showSnackBar(
+          context: context,
+          text: "投稿が完了しました！",
+          backgroundColor: Colors.white,
+          textColor: Colors.black,
+        );
+        Navigator.popUntil(context, (route) => route.isFirst);
+      }
+    } catch (e) {
+      showErrorSnackBar(context: context, text: 'エラーが発生しました。もう一度お試しください。');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  //投稿を更新させます
+  Future<void> _updateRecruitment() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final tagModel = Provider.of<TagProvider>(context, listen: false);
+      final List<String> tagStrings = tagModel.tagStrings;
+      final areaModel = Provider.of<AreaProvider>(context, listen: false);
+      final String selectedValue = areaModel.selectedValue.toString();
+      if (!_validateRequiredFields()) {
+        showErrorSnackBar(context: context, text: '必須項目が入力されていません');
+        _validateRequiredField('必須項目が入力されていません');
+        return;
+      }
+      if (tagStrings.isEmpty || selectedValue.isEmpty) {
+        if (tagStrings.isEmpty) {
+          tagModel.checkAndSetErrorBorder();
+          showErrorSnackBar(context: context, text: 'タグが追加が追加されていません');
+          return;
+        }
+        showErrorSnackBar(context: context, text: 'エリアが選択されていません');
+        return;
+      }
+
+      // 画像をアップロードしてURLを取得
+      String? url = await PostFirestore.uploadImage(imagePath, post.imageUrl);
+
+      String postAccountId = Authentication.myAccount!.id; // ユーザーのuserIdを取得
+      GamePost updatePost = GamePost(
+        postAccountId: postAccountId,
+        locationTagList: tagStrings,
+        prefecture: selectedValue,
+        teamName: _teamNameController.text,
+        createdTime: Timestamp.now(),
+        imageUrl: url,
+        note: _noteController.text,
+        level: integerValue!.toInt(),
+        member: _memberController.text,
+        ageList: _ageFilters,
+        type: 'game',
+      );
+      var result = await PostFirestore.updateGamePost(
+          widget.postId as String, updatePost);
+      if (result == true) {
+        showSnackBar(
+          context: context,
+          text: "更新が完了しました！",
+          backgroundColor: Colors.white,
+          textColor: Colors.black,
+        );
+        Navigator.popUntil(context, (route) => route.isFirst);
+      }
+    } catch (e) {
+      showSnackBar(
+        context: context,
+        text: "エラーが発生しました！",
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -102,369 +256,174 @@ class _PracticeGamePageState extends State<PracticeGamePage> {
     return null;
   }
 
-  void _handleItemSelected(String? value) {
-    setState(() {
-      _selectedDropdownValue = value;
-    });
-    // ここで選択されたアイテムを利用する処理を追加
-    print('選択されたアイテム: $_selectedDropdownValue');
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.indigo[900],
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.indigo[900],
-        actions: [
-          TextButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                _submitRecruitment();
-              }
-            },
-            child: Text(
-              '投稿する',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text.rich(
-                  TextSpan(
-                    text: 'チーム名',
-                    style: TextStyle(fontSize: 20.0, color: Colors.white),
-                    children: [
-                      TextSpan(
-                        text: '*',
-                        style: TextStyle(color: Colors.red, fontSize: 30),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                TextFormField(
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                  // テキストの文字色を白に設定
-                  controller: _titleController,
-                  maxLength: 25,
-                  decoration: InputDecoration(
-                    labelText: "チーム名",
-                    labelStyle: TextStyle(color: Colors.white),
-                    prefixIcon: Icon(
-                      Icons.diversity_3,
+    return _isLoading
+        ? ShowProgressIndicator()
+        : Scaffold(
+            backgroundColor: Colors.indigo[900],
+            appBar: AppBar(
+              elevation: 0,
+              backgroundColor: Colors.indigo[900],
+              actions: [
+                TextButton(
+                  onPressed: widget.isEditing
+                      ? () async {
+                          if (_formKey.currentState!.validate()) {
+                            _updateRecruitment();
+                          }
+                        }
+                      : () async {
+                          if (_formKey.currentState!.validate()) {
+                            _submitRecruitment();
+                          }
+                        },
+                  child: Text(
+                    widget.isEditing ? '投稿を更新する' : '投稿する',
+                    style: const TextStyle(
                       color: Colors.white,
-                    ),
-                    border: OutlineInputBorder(),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white), // 枠線の色を透明に設定
-                    ),
-                  ),
-                  validator: _validateRequiredField,
-                ),
-                SizedBox(height: 10.0),
-                Text.rich(
-                  TextSpan(
-                    text: '開催日',
-                    style: TextStyle(fontSize: 20.0, color: Colors.white),
-                    children: [
-                      TextSpan(
-                        text: '*',
-                        style: TextStyle(color: Colors.red, fontSize: 30),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                TextFormField(
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                  controller: _dateTimeController,
-                  decoration: InputDecoration(
-                    labelText: "開催日",
-                    labelStyle: TextStyle(color: Colors.white),
-                    prefixIcon: Icon(
-                      Icons.event,
-                      color: Colors.white,
-                    ),
-                    border: OutlineInputBorder(),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white), // 枠線の色を透明に設定
-                    ),
-                  ),
-                  validator: _validateRequiredField,
-                ),
-                SizedBox(height: 20.0),
-                Text.rich(
-                  TextSpan(
-                    text: '会場',
-                    style: TextStyle(fontSize: 20.0, color: Colors.white),
-                    children: [
-                      TextSpan(
-                        text: '*',
-                        style: TextStyle(color: Colors.red, fontSize: 30),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                CustomDropdownWidget(
-                  onItemSelected: _handleItemSelected,
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                TextFormField(
-                  style: TextStyle(color: Colors.white),
-                  controller: _addressController,
-                  decoration: InputDecoration(
-                    labelText: "会場",
-                    labelStyle: TextStyle(color: Colors.white),
-                    prefixIcon: Icon(Icons.location_on, color: Colors.white),
-                    border: OutlineInputBorder(),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white), // 枠線の色を透明に設定
-                    ),
-                  ),
-                  validator: _validateRequiredField,
-                ),
-                SizedBox(height: 20.0),
-                Text.rich(
-                  TextSpan(
-                    text: 'レベル',
-                    style: TextStyle(fontSize: 20.0, color: Colors.white),
-                    children: [
-                      TextSpan(
-                        text: '*',
-                        style: TextStyle(color: Colors.red, fontSize: 30),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                TextFormField(
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                  // テキストの文字色を白に設定
-                  controller: _levelController,
-                  maxLength: 25,
-                  decoration: InputDecoration(
-                    labelText: "レベル",
-                    labelStyle: TextStyle(color: Colors.white),
-                    prefixIcon: Icon(
-                      Icons.diversity_3,
-                      color: Colors.white,
-                    ),
-                    border: OutlineInputBorder(),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white), // 枠線の色を透明に設定
-                    ),
-                  ),
-                  validator: _validateRequiredField,
-                ),
-                SizedBox(height: 16.0),
-
-                Text.rich(
-                  TextSpan(
-                    text: 'チーム平均年齢',
-                    style: TextStyle(fontSize: 20.0, color: Colors.white),
-                    children: [
-                      TextSpan(
-                        text: '*',
-                        style: TextStyle(color: Colors.red, fontSize: 30),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                TextFormField(
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                  // テキストの文字色を白に設定
-                  controller: _averageAgeController,
-                  maxLength: 25,
-                  decoration: InputDecoration(
-                    labelText: "平均年齢",
-                    labelStyle: TextStyle(color: Colors.white),
-                    prefixIcon: Icon(
-                      Icons.diversity_3,
-                      color: Colors.white,
-                    ),
-                    border: OutlineInputBorder(),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white), // 枠線の色を透明に設定
-                    ),
-                  ),
-                  validator: _validateRequiredField,
-                ),
-                //画像
-                _imageInput(),
-                SizedBox(height: 16.0),
-                Text(
-                  '本文・連絡事項',
-                  style: TextStyle(fontSize: 20.0, color: Colors.white),
-                ),
-                TextFormField(
-                  style: TextStyle(color: Colors.white),
-                  controller: _noteController,
-                  keyboardType: TextInputType.multiline,
-                  textInputAction: TextInputAction.newline,
-                  maxLines: null,
-                  decoration: InputDecoration(
-                    labelStyle: TextStyle(color: Colors.white),
-                    border: OutlineInputBorder(),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white), // 枠線の色を透明に設定
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
                     ),
                   ),
                 ),
-                SizedBox(height: 30.0),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // if (_formKey.currentState!.validate()) {}
-                    },
-                    child: Text(
-                      '投稿する',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 30.0),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
+            body: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      RequiredCustomTextField(
+                        label: 'チーム名',
+                        hintText: 'チーム名を入力してください',
+                        controller: _teamNameController,
+                        validator: _validateRequiredField,
+                        icon: Icons.diversity_3,
+                      ),
+                      const Row(
+                        children: [
+                          Text.rich(
+                            TextSpan(
+                              text: '活動場所',
+                              style: TextStyle(
+                                  fontSize: 20.0, color: Colors.white),
+                              children: [
+                                TextSpan(
+                                  text: '*',
+                                  style: TextStyle(
+                                      color: Colors.red, fontSize: 30),
+                                ),
+                                TextSpan(
+                                  text: '* 6個まで追加可能',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 15),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10.0),
+                      const Row(
+                        children: [
+                          Expanded(
+                            child: TgaChips(),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10.0),
 
-  //カメラから画像を取得
-  Future<void> _takePicture() async {
-    final picker = ImagePicker();
-    //写真のファイルパスを取得
-    final imageFile =
-        await picker.getImage(source: ImageSource.camera, maxWidth: 600);
-    _clearImage();
-    setState(() {
-      _storeImage = File(imageFile!.path);
-    });
-  }
-
-  //ファイルから画像を取得
-  Future _getImageFromGallery() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
-    _clearImage();
-    setState(() {
-      _storeImage = File(pickedFile!.path);
-    });
-  }
-
-  // 画像のクリア
-  void _clearImage() {
-    setState(() {
-      _storeImage = null;
-    });
-  }
-
-  //画像追加
-  Widget _imageInput() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "画像を追加する",
-          style: TextStyle(fontSize: 20.0, color: Colors.white),
-        ),
-        SizedBox(height: 16.0),
-        Row(
-          children: [
-            Container(
-              width: 150,
-              height: 100,
-              decoration: BoxDecoration(
-                  border: Border.all(width: 1, color: Colors.grey)),
-              child: _storeImage != null
-                  ? Image.file(
-                      _storeImage!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                    )
-                  : Text(
-                      "No Image",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white),
-                    ),
-              alignment: Alignment.center,
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: _takePicture,
-                    icon: Icon(
-                      Icons.camera_alt,
-                      color: Colors.white,
-                    ),
-                    label: Text("カメラ"),
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Colors.transparent,
-                      elevation: 0,
-                    ),
+                      RequiredCustomTextField(
+                        label: 'メンバー構成',
+                        hintText: '男女混合など',
+                        controller: _memberController,
+                        validator: _validateRequiredField,
+                        icon: Icons.accessibility,
+                      ),
+                      CustomTextRich(
+                        mainText: 'チームレベル',
+                        optionalText: '',
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      RatingBar.builder(
+                        initialRating:
+                            widget.isEditing ? post.level.toDouble() : 0.0,
+                        itemBuilder: (context, index) => const Icon(
+                          Icons.star,
+                          color: Colors.yellow,
+                        ),
+                        onRatingUpdate: (rating) {
+                          integerValue = rating.toInt();
+                        },
+                        itemCount: 3,
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      CustomTextRich(
+                        mainText: '年齢層',
+                        optionalText: '(複数可)*',
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.white, width: 1.5),
+                          borderRadius: BorderRadius.circular(8.0), // 枠線の角の丸み
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Wrap(
+                            spacing: 4.0,
+                            runSpacing: 0.0,
+                            // children: ageFilterChips.toList(),
+                            children: FilterFunctions.getRecruitmentFilterChips(
+                              _ageFilters,
+                              ageChipItems,
+                              (updatedFilters) {
+                                setState(() {
+                                  _ageFilters = updatedFilters;
+                                });
+                              },
+                            ).toList(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 19,
+                      ),
+                      //画像
+                      ImageInput(
+                        imageBytes: imageBytes,
+                        setImagePath: (path) {
+                          setState(() {
+                            imagePath = path;
+                          });
+                        },
+                        setImageBytes: (bytes) {
+                          setState(() {
+                            imageBytes = bytes;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 20.0),
+                      NoteCustomTextField(
+                        labelText: 'アピールポイント・連絡事項',
+                        controller: _noteController,
+                      ),
+                    ],
                   ),
-                  ElevatedButton.icon(
-                    onPressed: _getImageFromGallery,
-                    icon: Icon(
-                      Icons.folder_copy,
-                      color: Colors.white,
-                    ),
-                    label: Text("フォルダ"),
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Colors.transparent,
-                      elevation: 0,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ],
-        ),
-      ],
-    );
+          );
   }
 }
 

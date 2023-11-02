@@ -9,8 +9,8 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../models/account.dart';
-import '../models/chat_post.dart';
-import '../repository/posts_firebase.dart';
+import '../models/talkroom.dart';
+import 'posts_firebase.dart';
 
 class UserFirestore {
   static final _firestoreInstance = FirebaseFirestore.instance;
@@ -45,6 +45,7 @@ class UserFirestore {
         Account myAccount = Account(
           id: data["user_id"],
           name: data["name"],
+          myToken: data["myToken"],
           imagePath: data["image_path"] ?? "",
         );
         Authentication.myAccount = myAccount;
@@ -211,6 +212,7 @@ class UserFirestore {
         Account postAccount = Account(
           name: data["name"],
           id: accountId,
+          myToken: data["myToken"],
           imagePath: data["image_path"],
         );
         print("投稿ユーザー情報取得: ${postAccount.id}");
@@ -235,6 +237,7 @@ class UserFirestore {
         Account user = Account(
           id: data["user_id"],
           name: data["name"],
+          myToken: data["myToken"],
           imagePath: data["image_path"] ?? "",
         );
         return user;

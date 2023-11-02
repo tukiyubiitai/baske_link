@@ -7,13 +7,15 @@ import '../../models/account.dart';
 import '../../providers/area_provider.dart';
 import '../../repository/posts_firebase.dart';
 import '../../repository/users_firebase.dart';
+import '../../widgets/common_widgets/snackbar_utils.dart';
 
 class SearchResultsPage extends StatefulWidget {
   // final String? selectedLocation;
   final String? keywordLocation;
   final bool isEditing;
 
-  SearchResultsPage({
+  const SearchResultsPage({
+    super.key,
     // this.selectedLocation,
     this.keywordLocation,
     required this.isEditing,
@@ -29,11 +31,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   @override
   void initState() {
     super.initState();
-    print(widget.isEditing);
     if (widget.isEditing == true) {
       _setupGameCustomStream();
     } else {
-      print("呼ばれた");
       _setupTeamCustomStream();
     }
   }
@@ -41,10 +41,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   void _setupGameCustomStream() {
     final areaModel = Provider.of<AreaProvider>(context, listen: false);
     final String selectedValue = areaModel.selectedValue;
-    print("_setupGameCustomStreamが呼ばれた");
     final postRef = PostFirestore.gamePosts;
-    print("ロケーション選択されました：　${selectedValue}");
-    print("キーワードが選択されました：　${widget.keywordLocation}");
 
     try {
       if (selectedValue.isNotEmpty && widget.keywordLocation!.isNotEmpty) {
@@ -68,20 +65,16 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
             .orderBy("created_time", descending: true)
             .snapshots();
       }
-    } catch (e, stackTrace) {
-      print("エラーが発生しました: $e");
-      print("スタックトレース: $stackTrace");
+    } catch (e) {
+      showErrorSnackBar(context: context, text: 'エラーが発生しました $e');
     }
   }
 
   void _setupTeamCustomStream() {
     final areaModel = Provider.of<AreaProvider>(context, listen: false);
     final String selectedValue = areaModel.selectedValue;
-    print("_setupTeamCustomStreamが呼ばれた");
 
     final postRef = PostFirestore.teamPosts;
-    print("ロケーション選択されました：　${selectedValue}");
-    print("キーワードが選択されました：　${widget.keywordLocation}");
 
     try {
       if (selectedValue.isNotEmpty && widget.keywordLocation!.isNotEmpty) {
@@ -105,9 +98,8 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
             .orderBy("created_time", descending: true)
             .snapshots();
       }
-    } catch (e, stackTrace) {
-      print("エラーが発生しました: $e");
-      print("スタックトレース: $stackTrace");
+    } catch (e) {
+      showErrorSnackBar(context: context, text: 'エラーが発生しました $e');
     }
   }
 
@@ -123,12 +115,10 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
         builder: (context, postSnapshot) {
           if (postSnapshot.connectionState == ConnectionState.waiting) {
             // データが読み込まれていない状態
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(), // ローディング中の表示
             );
           } else if (postSnapshot.hasError) {
-            print(postSnapshot.error);
-
             // エラーが発生した場合
             return Center(
               child: Text(
@@ -138,7 +128,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
             );
           } else if (!postSnapshot.hasData || postSnapshot.data!.docs.isEmpty) {
             // データが存在しない場合
-            return Center(
+            return const Center(
               child: Text(
                 "該当する投稿がありません",
                 style: TextStyle(color: Colors.white),
@@ -157,7 +147,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                 future: UserFirestore.getPostUserMap(postAccountIds),
                 builder: (context, userSnapshot) {
                   if (!userSnapshot.hasData || userSnapshot.data == null) {
-                    return Center(
+                    return const Center(
                       child: CircularProgressIndicator(),
                     );
                   }
@@ -178,7 +168,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                       },
                     );
                   } else {
-                    return Center(
+                    return const Center(
                       child: CircularProgressIndicator(),
                     );
                   }
@@ -189,7 +179,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                 future: UserFirestore.getPostUserMap(postAccountIds),
                 builder: (context, userSnapshot) {
                   if (!userSnapshot.hasData || userSnapshot.data == null) {
-                    return Center(
+                    return const Center(
                       child: CircularProgressIndicator(),
                     );
                   }
@@ -210,7 +200,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                       },
                     );
                   } else {
-                    return Center(
+                    return const Center(
                       child: CircularProgressIndicator(),
                     );
                   }
@@ -218,7 +208,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
               );
             }
           }
-          return SizedBox(); // または適切なウィジェットを返す
+          return const SizedBox(); // または適切なウィジェットを返す
         },
       ),
     );

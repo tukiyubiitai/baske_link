@@ -1,13 +1,22 @@
+import 'package:basketball_app/repository/users_firebase.dart';
+import 'package:basketball_app/screen/timeline/bottom_navigation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
-import '../bottom_navigation.dart';
+import '../models/account.dart';
+import '../screen/authentication/create_account_page.dart';
+import '../widgets/common_widgets/snackbar_utils.dart';
 
 class Authentication {
-  //Firebaseアプリ初期化
+  static Account? myAccount;
+
+  // //Firebaseアプリ初期化
   static Future<FirebaseApp> initializeFirebase(
       {required BuildContext context}) async {
     FirebaseApp firebaseApp = await Firebase.initializeApp();
@@ -18,19 +27,102 @@ class Authentication {
     //ユーザーが存在する場合、Navigatorを使用してUserInfoScreenに遷移することで、
     // 自動的にログインするための処理
     if (user != null) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => MyStatefulWidget(
-            user: user,
+      //ユーザが存在するか確認
+      bool userExists = await UserFirestore.checkUserExists(user.uid);
+      if (userExists) {
+        //新しいトークンを発行
+        final newToken = await FirebaseMessaging.instance.getToken();
+        // Firestoreから既存のトークンを取得する
+        final userDoc =
+            FirebaseFirestore.instance.collection('users').doc(user.uid);
+        final userSnapshot = await userDoc.get();
+        final storedToken = userSnapshot.data()!['myToken'];
+        if (newToken != storedToken) {
+          // 新しいtokenに変更
+          await userDoc.update({'myToken': newToken});
+        }
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+              builder: (context) => const BottomTabNavigator(
+                    initialIndex: 1,
+                    userId: '',
+                  )),
+        );
+      } else {
+        // ユーザーデータが存在しない場合、CreateAccountPageに遷移
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const CreateAccountPage(),
           ),
-        ),
-      );
+        );
+      }
     }
-
     return firebaseApp;
   }
 
-  //サインイン
+  //appleでサインイン
+  static Future<UserCredential?> AppleSignIn(
+      {required BuildContext context}) async {
+    final rawNonce = generateNonce();
+
+    // Request credential for the currently signed in Apple account.
+    final appleCredential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+    );
+
+    // Create an `OAuthCredential` from the credential returned by Apple.
+    final oauthCredential = OAuthProvider("apple.com").credential(
+      idToken: appleCredential.identityToken,
+      rawNonce: rawNonce,
+      accessToken: appleCredential.authorizationCode,
+    );
+
+    try {
+      // Firebaseでサインイン
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+
+      // ユーザーが存在するか確認
+      bool userExists =
+          await UserFirestore.checkUserExists(userCredential.user!.uid);
+      // onLoginSuccess(context);
+
+      if (userExists) {
+        // ユーザーが存在する場合、MyStatefulWidgetに遷移
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => BottomTabNavigator(
+                    initialIndex: 1,
+                    userId: '',
+                  )),
+        );
+      } else {
+        // ユーザーが存在しない場合、CreateAccountPageに遷移
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const CreateAccountPage()),
+        );
+      }
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      // サインインエラーのハンドリング
+      showErrorSnackBar(context: context, text: 'エラーが発生しました。もう一度お試しください。');
+    } on FirebaseException catch (e) {
+      // その他のFirebase関連エラーのハンドリング
+      showErrorSnackBar(context: context, text: 'エラーが発生しました。もう一度お試しください。');
+    } catch (e) {
+      // その他の予期しないエラーのハンドリング
+      showErrorSnackBar(context: context, text: 'エラーが発生しました。もう一度お試しください。');
+    }
+
+    return null;
+  }
+
   static Future<User?> signInWithGoogle({required BuildContext context}) async {
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user;
@@ -62,6 +154,30 @@ class Authentication {
             await auth.signInWithCredential(credential);
 
         user = userCredential.user;
+        if (user != null) {
+          // onLoginSuccess(context);
+          // ログイン成功時の処理
+          bool userExists = await UserFirestore.checkUserExists(user.uid);
+
+          if (userExists) {
+            // ユーザーが存在する場合、MyStatefulWidgetに遷移
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const BottomTabNavigator(
+                        initialIndex: 1,
+                        userId: '',
+                      )),
+            );
+          } else {
+            // ユーザーが存在しない場合、CreateAccountPageに遷移
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const CreateAccountPage()),
+            );
+          }
+        }
       } on FirebaseAuthException catch (e) {
         if (e.code == 'account-exists-with-different-credential') {
           // handle the error here
@@ -95,7 +211,7 @@ class Authentication {
       backgroundColor: Colors.black,
       content: Text(
         content,
-        style: TextStyle(color: Colors.redAccent, letterSpacing: 0.5),
+        style: const TextStyle(color: Colors.redAccent, letterSpacing: 0.5),
       ),
     );
   }

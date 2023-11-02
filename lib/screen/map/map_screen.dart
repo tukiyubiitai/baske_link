@@ -5,13 +5,15 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
-import '../../../providers/map_provider.dart';
-import '../../../widgets/common_widgets/snackbar_utils.dart';
-import '../view_model/map_view_model.dart';
-import '../widget/button_section.dart';
-import '../widget/list_section.dart';
+import '../../providers/map_provider.dart';
+import '../../repository/map_view_model.dart';
+import '../../widgets/common_widgets/snackbar_utils.dart';
+import '../../widgets/map_widgets/button_section.dart';
+import '../../widgets/map_widgets/list_section.dart';
 
 class MapPage extends StatefulWidget {
+  const MapPage({super.key});
+
   @override
   State<MapPage> createState() => MapPageState();
 }
@@ -47,15 +49,15 @@ class MapPageState extends State<MapPage> {
         alignment: Alignment.bottomCenter,
         children: [
           Consumer<MapProvider>(builder: (context, model, child) {
-            return _mapSection();
+            return _buildMapSection();
           }),
           ButtonSection(),
           Consumer<MapProvider>(builder: (context, model, child) {
             if (model.loadMarkers) {
               //マーカー表示の処理が終わったら表示
-              return ListSection();
+              return const ListSection();
             } else {
-              return SizedBox();
+              return const SizedBox();
             }
           }),
           // TestPage(),
@@ -70,7 +72,7 @@ class MapPageState extends State<MapPage> {
     zoom: 15,
   );
 
-  Widget _mapSection() {
+  Widget _buildMapSection() {
     final mapProvider = Provider.of<MapProvider>(context, listen: false);
     return GoogleMap(
       mapType: MapType.normal,
@@ -110,8 +112,6 @@ class MapPageState extends State<MapPage> {
           context: context,
           text: "バスケットコート情報の取得中にエラーが発生しました: $e",
         );
-        // エラー処理を追加
-        print('バスケットコート情報の取得エラー: $e');
       }
     }
   }

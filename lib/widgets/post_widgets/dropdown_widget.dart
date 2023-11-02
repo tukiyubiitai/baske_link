@@ -2,15 +2,17 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../data/area_list.dart';
-import '../providers/area_provider.dart';
+import '../../data/area_list.dart';
+import '../../providers/area_provider.dart';
 
 //エリア
 class AreaDropdownMenuWidget extends StatelessWidget {
-  AreaDropdownMenuWidget({super.key});
+  const AreaDropdownMenuWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController searchController = TextEditingController();
+
     // final model = Provider.of<AreaModel>(context, listen: false);
     return Container(
       decoration: BoxDecoration(
@@ -20,7 +22,7 @@ class AreaDropdownMenuWidget extends StatelessWidget {
         return DropdownButtonHideUnderline(
           child: DropdownButton2<String>(
             isExpanded: true,
-            hint: Text(
+            hint: const Text(
               'エリア',
               style: TextStyle(
                 fontSize: 14,
@@ -42,13 +44,11 @@ class AreaDropdownMenuWidget extends StatelessWidget {
             value: model.selectedValue.isNotEmpty ? model.selectedValue : null,
             onChanged: (value) {
               if (value != null) {
-                print("選択された $value");
                 model.setSelectedValue(value);
-                print("これが追加された: ${model.selectedValue}");
               }
             },
             buttonStyleData: ButtonStyleData(
-              padding: EdgeInsets.symmetric(horizontal: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               height: 58,
               width: 90,
               decoration: BoxDecoration(
@@ -63,7 +63,7 @@ class AreaDropdownMenuWidget extends StatelessWidget {
               height: 40,
             ),
             dropdownSearchData: DropdownSearchData(
-              searchController: TextEditingController(),
+              searchController: searchController,
               searchInnerWidgetHeight: 50,
               searchInnerWidget: Container(
                 height: 50,
@@ -76,7 +76,7 @@ class AreaDropdownMenuWidget extends StatelessWidget {
                 child: TextFormField(
                   expands: true,
                   maxLines: null,
-                  controller: TextEditingController(),
+                  controller: searchController,
                   decoration: InputDecoration(
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(
@@ -97,7 +97,7 @@ class AreaDropdownMenuWidget extends StatelessWidget {
             ),
             onMenuStateChange: (isOpen) {
               if (!isOpen) {
-                TextEditingController().clear();
+                searchController.clear();
               }
             },
           ),

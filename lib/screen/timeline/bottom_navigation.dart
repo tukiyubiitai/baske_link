@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../screen/account_settings/my_user_page.dart';
-import '../screen/map/map_screen.dart';
-import '../screen/talk/talk_room.dart';
-import '../screen/timeline/timeline_page.dart';
+import '../account_settings/my_user_page.dart';
+import '../map/map_screen.dart';
+import '../talk/talk_room.dart';
+import 'timeline_page.dart';
 
 class BottomTabNavigator extends StatefulWidget {
   final int initialIndex; // initialIndexパラメータを追加
   final String? userId;
 
-  BottomTabNavigator(
-      {required this.initialIndex, required this.userId}); // コンストラクタにパラメータを追加
+  const BottomTabNavigator(
+      {super.key,
+      required this.initialIndex,
+      required this.userId}); // コンストラクタにパラメータを追加
 
   @override
   State<BottomTabNavigator> createState() => _BottomTabNavigatorState();
@@ -27,7 +29,7 @@ class _BottomTabNavigatorState extends State<BottomTabNavigator> {
 
   void _selectedTab(int index) {
     if (index == 3) {
-      _screens[3] = UserAccountPage();
+      _screens[3] = const UserAccountPage();
       _selectedIndex = 3;
       return;
     }
@@ -39,11 +41,11 @@ class _BottomTabNavigatorState extends State<BottomTabNavigator> {
     });
   }
 
-  List _screens = [
+  final List _screens = [
     TimelinePage(),
-    TalkRoomPage(),
-    HomePage(),
-    UserAccountPage(),
+    const TalkRoomPage(),
+    const MapPage(),
+    const UserAccountPage(),
   ];
 
   @override
