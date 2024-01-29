@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../infrastructure/image_processing/image_processing_utils.dart';
 import '../../../models/chip_Item.dart';
 import '../../../utils/filter_functions.dart';
@@ -15,7 +16,6 @@ import '../../state/providers/global_loader.dart';
 import '../../state/providers/post/age_notifier.dart';
 import '../../state/providers/post/tag_area_notifier.dart';
 import '../../view_models/game_view_model.dart';
-import '../../view_models/post_view_model.dart';
 import '../../widgets/area_dropdown_menu_widget.dart';
 import '../../widgets/common_widgets/back_button_widget.dart';
 import '../../widgets/post/image_widget.dart';
@@ -34,7 +34,6 @@ class GamePostPage extends ConsumerStatefulWidget {
 }
 
 class _NewGamePostPageState extends ConsumerState<GamePostPage> {
-  final postViewModel = PostViewModel();
   final TextEditingController _teamController = TextEditingController();
   final TextEditingController _memberController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();

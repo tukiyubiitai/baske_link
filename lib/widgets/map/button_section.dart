@@ -133,8 +133,7 @@ class ButtonSection extends ConsumerWidget {
     return ElevatedButton(
       onPressed: () async {
         LatLng center = await MapViewModel().getMiddlePoint(context, ref);
-        await MapViewModel()
-            .setMarkers(center.latitude, center.longitude, context, ref);
+        await MapViewModel().setMarkers(center.latitude, center.longitude, ref);
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.indigo[900],

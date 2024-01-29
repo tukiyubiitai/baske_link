@@ -79,8 +79,17 @@ class DataLayerException implements Exception {
 }
 
 class ErrorHandler {
+  // プライベートなコンストラクタ
+  ErrorHandler._internal();
+
+  // クラスの唯一のインスタンス
+  static final ErrorHandler _instance = ErrorHandler._internal();
+
+  // インスタンスへのアクセス用の公開されたゲッター
+  static ErrorHandler get instance => _instance;
+
   // エラーメッセージを表示し、エラーステートをリセットする
-  static void showAndResetError(
+  void showAndResetError(
       String errorMessage, BuildContext context, WidgetRef ref) {
     showErrorSnackBar(context: context, text: errorMessage);
     ref.read(errorMessageProvider.notifier).state = null;

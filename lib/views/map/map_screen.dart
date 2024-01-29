@@ -5,8 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../../dialogs/snackbar_utils.dart';
 import '../../state/providers/map/map_provider.dart';
+import '../../state/providers/providers.dart';
+import '../../utils/error_handler.dart';
 import '../../view_models/map_view_model.dart';
 import '../../widgets/map/button_section.dart';
 import '../../widgets/map/list_section.dart';
@@ -40,6 +41,13 @@ class MapPageState extends ConsumerState<MapPage> {
 
   @override
   Widget build(BuildContext context) {
+    final errorMessage = ref.watch(errorMessageProvider); //エラーを監視
+
+    //エラーメッセージが更新された際にユーザーに通知
+    if (errorMessage != null) {
+      ErrorHandler.instance.showAndResetError(errorMessage, context, ref);
+    }
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -86,27 +94,19 @@ class MapPageState extends ConsumerState<MapPage> {
     _controller = controller;
     mapStateNotifier.addMapController(_controller);
     if (mapStateNotifier.currentPosition != null) {
-      try {
-        final zoomLevel = await mapStateNotifier.mapController!.getZoomLevel();
-        //スワイプ後のcourtの座標までカメラを移動
-        mapStateNotifier.mapController!.animateCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(
-              target: LatLng(mapStateNotifier.currentPosition!.latitude,
-                  mapStateNotifier.currentPosition!.longitude),
-              zoom: zoomLevel,
-            ),
+      final zoomLevel = await mapStateNotifier.mapController!.getZoomLevel();
+      //スワイプ後のcourtの座標までカメラを移動
+      mapStateNotifier.mapController!.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(mapStateNotifier.currentPosition!.latitude,
+                mapStateNotifier.currentPosition!.longitude),
+            zoom: zoomLevel,
           ),
-        );
-
-        await viewModel.setMarkers(mapStateNotifier.currentPosition!.latitude,
-            mapStateNotifier.currentPosition!.longitude, context, ref);
-      } catch (e) {
-        showErrorSnackBar(
-          context: context,
-          text: "バスケットコート情報の取得中にエラーが発生しました: $e",
-        );
-      }
+        ),
+      );
+      await viewModel.setMarkers(mapStateNotifier.currentPosition!.latitude,
+          mapStateNotifier.currentPosition!.longitude, ref);
     }
     //map読み込み完了を通知
     mapStateNotifier.setLoadMap(true);

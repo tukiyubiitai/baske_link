@@ -61,19 +61,11 @@ class TeamRecruitmentPage extends ConsumerWidget {
                     final post = teamPostData.posts[index];
                     final user = teamPostData.users[index];
 
-                    // return teamPostData != null
-                    //     ?
                     return TeamPostItem(
                       postId: post.id,
                       postData: post,
                       userData: user,
                     );
-                    // : const Center(
-                    //     child: Text(
-                    //       'ユーザー情報が見つかりません',
-                    //       style: TextStyle(color: Colors.white),
-                    //     ),
-                    //   );
                   },
                 );
               },

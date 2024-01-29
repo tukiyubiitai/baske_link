@@ -7,14 +7,14 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../infrastructure/image_processing/image_processing_utils.dart';import '../../dialogs/snackbar_utils.dart';
+import '../../../infrastructure/image_processing/image_processing_utils.dart';
+import '../../dialogs/snackbar_utils.dart';
 import '../../models/posts/team_model.dart';
 import '../../state/providers/global_loader.dart';
 import '../../state/providers/post/age_notifier.dart';
 import '../../state/providers/post/tag_area_notifier.dart';
 import '../../state/providers/post/target_notifier.dart';
 import '../../state/providers/team/team_post_notifier.dart';
-import '../../view_models/post_view_model.dart';
 import '../../view_models/team_view_model.dart';
 import '../../widgets/area_dropdown_menu_widget.dart';
 import '../../widgets/bottom_navigation.dart';
@@ -35,8 +35,6 @@ class TeamPostPage extends ConsumerStatefulWidget {
 }
 
 class _TestPageState extends ConsumerState<TeamPostPage> {
-  final postViewModel = PostViewModel();
-
   late TeamPostViewModel _controller;
 
   final TextEditingController _teamController = TextEditingController();

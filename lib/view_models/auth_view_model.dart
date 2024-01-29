@@ -5,72 +5,63 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../infrastructure/firebase/account_firebase.dart';
-import '../../infrastructure/firebase/authentication_service.dart';
 import '../../utils/error_handler.dart';
-import '../models/auth/auth_status.dart';
-import '../state/providers/global_loader.dart';
+import '../utils/loading_manager.dart';
+import '../utils/logger.dart';
 
 class AuthViewModel extends ChangeNotifier {
   final auth = FirebaseAuth.instance;
 
+  /// ユーザー認証を行い、その存在をFirebaseで確認します。
+  /// [user] - ユーザー認証の結果。
+  /// [ref] - WidgetRefを使用して、Providerから状態を読み取るために使用されます。
+  /// 戻り値はユーザーが存在する場合はtrue、そうでない場合はfalseです。
+  Future<bool> authenticateUser(UserCredential? user, WidgetRef ref) async {
+    if (user != null) {
+      // firebaseにユーザーが存在するか確認
+      bool userExists = await AccountFirestore.checkUserExists(user.user!.uid);
+      return userExists;
+    }
+    return false;
+  }
+
+  /// Appleでサインインを試み、成功すればユーザー認証を行います。
+  /// [ref] - WidgetRefを使用して、Providerから状態を読み取るために使用されます。
+  /// 戻り値はサインイン成功時にtrue、失敗時にfalseです。
   Future<bool> signInWithApple(WidgetRef ref) async {
     try {
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(true);
+      LoadingManager.instance.startLoading(ref);
       UserCredential? user = await authenticateWithApple();
-      if (user != null) {
-        // firebaseにユーザーが存在するか確認
-        bool userExists =
-            await AccountFirestore.checkUserExists(user.user!.uid);
-        if (userExists) {
-          return true;
-        }
-      }
-      return false;
+      return await authenticateUser(user, ref);
     } catch (e) {
-      print("サインインに失敗しました　$e");
-      throw getErrorMessage(e);
+      AppLogger.instance.error("サインインに失敗 $e");
+      ErrorHandler.instance.setErrorState(ref, getErrorMessage(e));
+      return false;
     } finally {
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(false);
+      LoadingManager.instance.stopLoading(ref);
     }
   }
 
+  /// Googleでサインインを試み、成功すればユーザー認証を行います。
+  /// [ref] - WidgetRefを使用して、Providerから状態を読み取るために使用されます。
+  /// 戻り値はサインイン成功時にtrue、失敗時にfalseです。
   Future<bool> signInWithGoogle(WidgetRef ref) async {
     try {
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(true);
+      LoadingManager.instance.startLoading(ref);
       UserCredential? user = await authenticateWithGoogle();
-      if (user != null) {
-        // firebaseにユーザーが存在するか確認
-        bool userExists =
-            await AccountFirestore.checkUserExists(user.user!.uid);
-        if (userExists) {
-          return true;
-        }
-      }
-      return false;
+      return await authenticateUser(user, ref);
     } catch (e) {
-      print("サインインに失敗しました　$e");
-      throw getErrorMessage(e);
+      AppLogger.instance.error("サインインに失敗 $e");
+      ErrorHandler.instance.setErrorState(ref, getErrorMessage(e));
+      return false;
     } finally {
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(false);
+      LoadingManager.instance.stopLoading(ref);
     }
   }
 
-  Future<AuthStatus> signIn(WidgetRef ref) async {
-    final user = await AuthenticationService().getCurrentUser();
-    if (user == null) return AuthStatus.unauthenticated; // 認証されていない
-
-    //Firestoreにユーザーデータがあるかチェック
-    final userAccount = await AccountFirestore.fetchUserData(user.uid);
-    if (userAccount != null) {
-      //トークン更新
-      AuthenticationService().updateUserToken(user);
-
-      return AuthStatus.authenticated; // 認証され、Firestoreにデータがある
-    } else {
-      return AuthStatus.accountNotCreated; // アカウントはあるが、Firestoreにデータがない
-    }
-  }
-
+  /// ユーザーのサインアウトを行います。
+  /// Webプラットフォームではない場合、Googleアカウントからもサインアウトします。
+  /// 戻り値はサインアウトが成功したかどうかです。
   Future<bool> signOut() async {
     final GoogleSignIn googleSignIn = GoogleSignIn();
     if (!kIsWeb) {
@@ -80,11 +71,14 @@ class AuthViewModel extends ChangeNotifier {
     return true;
   }
 
-  //appleでサインイン
+  /// Appleでのサインインプロセスを実行するメソッドです。
+  /// Apple IDを使用してユーザー認証を行い、その結果をFirebase Authで使用するためのOAuthCredentialに変換します。
+  /// 戻り値はFirebase Authを通じて認証されたUserCredentialです。
+  /// このメソッドはユーザーがApple IDを用いてアプリにログインする際に使用されます。
   Future<UserCredential?> authenticateWithApple() async {
     final rawNonce = generateNonce();
 
-    // Request credential for the currently signed in Apple account.
+    // Apple IDを使用して認証情報をリクエストします。
     final appleCredential = await SignInWithApple.getAppleIDCredential(
       scopes: [
         AppleIDAuthorizationScopes.email,
@@ -92,44 +86,47 @@ class AuthViewModel extends ChangeNotifier {
       ],
     );
 
-    // Create an `OAuthCredential` from the credential returned by Apple.
+    // Appleから返された認証情報をOAuthCredentialに変換します。
     final oauthCredential = OAuthProvider("apple.com").credential(
       idToken: appleCredential.identityToken,
       rawNonce: rawNonce,
       accessToken: appleCredential.authorizationCode,
     );
 
-    // Firebaseでサインイン
+    // 生成されたOAuthCredentialを使用してFirebaseでのサインインを行います。
     UserCredential userCredential =
         await FirebaseAuth.instance.signInWithCredential(oauthCredential);
     return userCredential;
   }
 
-  //googleサインイン
+  /// Googleでのサインインプロセスを実行するメソッドです。
+  /// Googleアカウントを使用してユーザー認証を行い、その結果をFirebase Authで使用するためのAuthCredentialに変換します。
+  /// 戻り値はFirebase Authを通じて認証されたUserCredentialです。
+  /// このメソッドはユーザーがGoogleアカウントを用いてアプリにログインする際に使用されます。
+  ///googleサインイン
   Future<UserCredential?> authenticateWithGoogle() async {
     FirebaseAuth auth = FirebaseAuth.instance;
 
-    //Googleアカウントにログインし、
+    // Googleアカウントでのログインを試みます。
     final GoogleSignIn googleSignIn = GoogleSignIn();
 
-    //そのアカウントの情報をGoogleSignInAccountオブジェクトとして取得する。
-    // アカウント情報が取得できた場合は、googleSignInAccount変数に格納する.
+    // GoogleSignInAccountオブジェクトを取得します。
+    // ユーザーがGoogleアカウントでログインした場合にこのオブジェクトが返されます。
     final GoogleSignInAccount? googleSignInAccount =
         await googleSignIn.signIn();
 
-    //アカウント情報が取得できた場合
+    // ユーザーがGoogleアカウントでのログインに成功した場合
     if (googleSignInAccount != null) {
       final GoogleSignInAuthentication googleSignInAuthentication =
           await googleSignInAccount.authentication;
 
-      //Googleアカウントの認証情報からAuthCredentialオブジェクトを作成する。
-      // アクセストークンとIDトークンを引数に与え、credential変数に格納する。
+      // Googleアカウントの認証情報からAuthCredentialを生成します。
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleSignInAuthentication.accessToken,
         idToken: googleSignInAuthentication.idToken,
       );
 
-      // Firebaseでサインイン
+      // 生成されたAuthCredentialを使用してFirebaseでのサインインを行います。
       final UserCredential userCredential =
           await auth.signInWithCredential(credential);
       return userCredential;

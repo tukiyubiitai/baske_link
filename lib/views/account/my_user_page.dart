@@ -2,6 +2,7 @@ import 'package:basketball_app/views/account/user_settings_page.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../state/providers/account/account_notifier.dart';
 import '../../state/providers/games/my_game_post_provider.dart';
 import '../../state/providers/team/my_team_post_provider.dart';
@@ -21,8 +22,6 @@ class MyUserPage extends ConsumerStatefulWidget {
 class _MyPageState extends ConsumerState<MyUserPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
-  // final myAccount = AuthenticationService.myAccount!;
 
   //プッシュ通知の設定
   void setupPushNotifications() async {

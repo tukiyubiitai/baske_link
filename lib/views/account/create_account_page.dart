@@ -29,8 +29,6 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
   TextEditingController _nameController = TextEditingController();
   File? image; //ユーザーが選択したプロフィール画像
 
-  final loadingManager = LoadingManager(); //ローディング
-
   @override
   void dispose() {
     _nameController.dispose();
@@ -46,7 +44,7 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
 
     //エラーメッセージが更新された際にユーザーに通知
     if (errorMessage != null) {
-      ErrorHandler.showAndResetError(errorMessage, context, ref);
+      ErrorHandler.instance.showAndResetError(errorMessage, context, ref);
     }
 
     // アカウント作成成功後の画面遷移
@@ -200,7 +198,7 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
   Future<void> onSelectProfileImage(BuildContext context) async {
     try {
       //ロード開始
-      loadingManager.startLoading(ref);
+      LoadingManager.instance.startLoading(ref);
       var result = await cropImage();
       if (result != null) {
         image = File(result.path);
@@ -211,7 +209,7 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
       }
     } finally {
       //ロード終了
-      loadingManager.stopLoading(ref);
+      LoadingManager.instance.stopLoading(ref);
     }
   }
 }

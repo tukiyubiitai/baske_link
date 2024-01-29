@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../infrastructure/firebase/storage_firebase.dart';
 import '../../../infrastructure/image_processing/image_processing_utils.dart';
 import '../../../models/app_colors.dart';
@@ -31,7 +32,6 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
   File? image; //ユーザーが選択したプロフィール画像
   late TextEditingController _nameController;
   bool isImageDeleted = false; //画像を削除したどうか
-  final loadingManager = LoadingManager(); //ローディング
 
   @override
   void initState() {
@@ -55,7 +55,7 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
 
     //エラーメッセージが更新された際にユーザーに通知
     if (errorMessage != null) {
-      ErrorHandler.showAndResetError(errorMessage, context, ref);
+      ErrorHandler.instance.showAndResetError(errorMessage, context, ref);
     }
 
     // アカウント作成成功後の画面遷移
@@ -261,7 +261,7 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
   // 画像の削除または追加を行う処理
   Future<void> processImageAction(BuildContext context, bool isDeleting) async {
     try {
-      loadingManager.startLoading(ref);
+      LoadingManager.instance.startLoading(ref);
       if (isDeleting) {
         // 画像削除の処理
         if (ref.read(accountStateNotifierProvider).imagePath != null) {
@@ -283,7 +283,7 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
         }
       }
     } finally {
-      loadingManager.stopLoading(ref);
+      LoadingManager.instance.stopLoading(ref);
     }
   }
 }

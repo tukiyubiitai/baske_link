@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:basketball_app/infrastructure/firebase/game_posts_firebase.dart';
 import 'package:basketball_app/view_models/post_view_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,6 +17,8 @@ import '../state/providers/games/my_game_post_provider.dart';
 import '../state/providers/global_loader.dart';
 import '../state/providers/post/age_notifier.dart';
 import '../state/providers/post/tag_area_notifier.dart';
+import '../utils/loading_manager.dart';
+import '../utils/logger.dart';
 
 class GamePostViewModel extends ChangeNotifier {
   static final _firestoreInstance = FirebaseFirestore.instance;
@@ -30,21 +30,20 @@ class GamePostViewModel extends ChangeNotifier {
 
   //gamePost保存
   Future<bool> gamePostSubmit(WidgetRef ref) async {
-    var gameState = ref.read(gameStateNotifierProvider);
-    var ageState = ref.read(ageStateProvider);
-    final tagProvider = ref.read(tagAreaStateProvider);
-
+    var gamePostState = ref.read(gameStateNotifierProvider);
+    var ageTag = ref.read(ageStateProvider);
+    final locationTag = ref.read(tagAreaStateProvider);
     final Account myAccount = ref.read(accountNotifierProvider);
     //ローカルからデータを取ってくる
 
-    String teamName = gameState.teamName;
+    String teamName = gamePostState.teamName;
 
-    String prefecture = gameState.prefecture;
-    String member = gameState.member;
-    String note = gameState.note.toString();
-    int level = gameState.level;
+    String prefecture = gamePostState.prefecture;
+    String member = gamePostState.member;
+    String note = gamePostState.note.toString();
+    int level = gamePostState.level;
 
-    String? imageUrl = gameState.imageUrl;
+    String? imageUrl = gamePostState.imageUrl;
 
     // 入力検証のロジック
     if (!isValidGameState(ref)) {
@@ -53,7 +52,7 @@ class GamePostViewModel extends ChangeNotifier {
 
     try {
       //ロード開始
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(true);
+      LoadingManager.instance.startLoading(ref);
 
       // 画像をアップロードしてURLを取得
       final String? url = imageUrl != null && imageUrl.isNotEmpty
@@ -62,13 +61,13 @@ class GamePostViewModel extends ChangeNotifier {
 
       GamePost newPost = GamePost(
         postAccountId: myAccount.id,
-        locationTagList: tagProvider,
+        locationTagList: locationTag,
         teamName: teamName,
         level: level,
         prefecture: prefecture,
         createdTime: Timestamp.now(),
         member: member,
-        ageList: ageState,
+        ageList: ageTag,
         type: 'game',
         imageUrl: url,
         note: note,
@@ -84,11 +83,13 @@ class GamePostViewModel extends ChangeNotifier {
       }
       return false;
     } catch (e) {
-      throw getErrorMessage(e);
+      AppLogger.instance.error("投稿失敗 $e");
+      ErrorHandler.instance.setErrorState(ref, getErrorMessage(e));
     } finally {
       //終了
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(false);
+      LoadingManager.instance.stopLoading(ref);
     }
+    return false;
   }
 
   //gamePost更新
@@ -114,7 +115,7 @@ class GamePostViewModel extends ChangeNotifier {
 
     try {
       //ロード開始
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(true);
+      LoadingManager.instance.startLoading(ref);
 
       // 画像をアップロードしてURLを取得
       final String? url =
@@ -148,11 +149,13 @@ class GamePostViewModel extends ChangeNotifier {
       }
       return false;
     } catch (e) {
-      throw getErrorMessage(e);
+      AppLogger.instance.error("投稿更新失敗 $e");
+      ErrorHandler.instance.setErrorState(ref, getErrorMessage(e));
     } finally {
       //終了
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(false);
+      LoadingManager.instance.stopLoading(ref);
     }
+    return false;
   }
 
   //投稿削除する関数
@@ -171,7 +174,7 @@ class GamePostViewModel extends ChangeNotifier {
         "",
       );
 
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(false);
+      LoadingManager.instance.startLoading(ref);
 
       if (result) {
         //更新処理
@@ -185,10 +188,12 @@ class GamePostViewModel extends ChangeNotifier {
         return false;
       }
     } catch (e) {
-      throw getErrorMessage(e);
+      AppLogger.instance.error("投稿削除 $e");
+      ErrorHandler.instance.setErrorState(ref, getErrorMessage(e));
     } finally {
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(false);
+      LoadingManager.instance.stopLoading(ref);
     }
+    return false;
   }
 
   //入力チェック
@@ -245,19 +250,6 @@ class GamePostViewModel extends ChangeNotifier {
     return null;
   }
 
-  //画像の読み込み
-  Future<Uint8List?> loadImage(GamePost post) async {
-    try {
-      if (post.imageUrl != null) {
-        final imageRef = storage.refFromURL(post.imageUrl.toString());
-        return (await imageRef.getData());
-      }
-      return null;
-    } catch (e) {
-      throw getErrorMessage(e);
-    }
-  }
-
   //gamePostの読み込み完了を知らせる
   Future<List<GamePost>?> loadGamePost(String postId) async {
     try {
@@ -274,7 +266,9 @@ class GamePostViewModel extends ChangeNotifier {
 
   //gamePost絞り込み
   Future<GamePostData> retrieveFilteredGamePosts(
-      String? selectedLocation, String? keywordLocation) async {
+    String? selectedLocation,
+    String? keywordLocation,
+  ) async {
     try {
       // クエリを作成し、投稿を作成時間の降順に並べる
       Query query = gamePosts.orderBy('created_at', descending: true);
@@ -304,7 +298,7 @@ class GamePostViewModel extends ChangeNotifier {
       }
       return await GamePostFirestore().fetchGamePosts(query);
     } catch (e) {
-      print("gamePost絞り込み結果取得エラー");
+      AppLogger.instance.error("gamePost絞り込みエラー $e");
       throw e;
     }
   }
@@ -326,7 +320,7 @@ class GamePostViewModel extends ChangeNotifier {
       gamePostList = await GamePostFirestore().getMyGamePostFromIds(myPostIds);
       return gamePostList;
     } on FirebaseException catch (e) {
-      print("投稿取得エラー: $e");
+      AppLogger.instance.error("投稿取得エラー $e");
       throw e;
     }
   }
