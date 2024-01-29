@@ -1,32 +1,26 @@
-import 'package:basketball_app/providers/map_provider.dart';
-import 'package:basketball_app/providers/tag_provider.dart';
-import 'package:basketball_app/screen/authentication/authentication_page.dart';
+import 'package:basketball_app/infrastructure/storage.dart';
+import 'package:basketball_app/views/auth/login_and_signup_page.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'providers/area_provider.dart';
+import 'firebase_options.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await StorageService().init();
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider<MapProvider>(
-          create: (context) => MapProvider(),
-        ),
-        ChangeNotifierProvider<TagProvider>(
-          create: (context) => TagProvider(),
-        ),
-        ChangeNotifierProvider<AreaProvider>(
-          create: (context) => AreaProvider(),
-        ),
-      ],
-      child: const MyApp(),
+    ProviderScope(
+      child: MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +29,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const LoginAndSignupPage(),
+      // home: LoginAndSignupPage(),
+      home: LoginAndSignupPage(),
     );
   }
 }

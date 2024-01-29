@@ -1,12 +1,13 @@
 import 'dart:convert' as convert;
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 
-import '../map_api_key.dart';
-import '../models/locations.dart';
-import '../providers/map_provider.dart';
+import '../state/providers/locations.dart';
+import '../state/providers/map/map_provider.dart';
+import '../utils/map_api_key.dart';
 
 class MapRepository {
   //バスケットコートのデータを取得
@@ -30,8 +31,9 @@ class MapRepository {
   }
 
   //placeIdを使用して詳細な場所情報を取得し、先頭の写真データだけを取得
-  Future<void> fetchPhoto(String placeId, context) async {
-    final mapProvider = Provider.of<MapProvider>(context, listen: false);
+  Future<void> fetchPhoto(
+      String placeId, BuildContext context, WidgetRef ref) async {
+    final mapStateNotifier = ref.read(mapProvider);
 
     //Google Maps Places APIの詳細情報を取得
     // placeRes --> APIからのレスポンス
@@ -45,7 +47,7 @@ class MapRepository {
     if (placeData["result"] == null ||
         placeData["result"]["photos"] == null ||
         placeData["result"]["photos"].isEmpty) {
-      mapProvider.addUrls(
+      mapStateNotifier.addUrls(
           "https://www.shoshinsha-design.com/wp-content/uploads/2020/05/noimage-760x460.png");
       return;
     }
@@ -58,24 +60,25 @@ class MapRepository {
     final url =
         "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=$apiKey&language=ja";
     // _urls.add(url);
-    mapProvider.addUrls(url);
+    mapStateNotifier.addUrls(url);
   }
 
   //placeIdを使用して詳細な場所情報を取得し、写真データを取得
-  Future<void> fetchDetailPhoto(String placeId, context) async {
-    final mapProvider = Provider.of<MapProvider>(context, listen: false);
+  Future<void> fetchDetailPhoto(
+      String placeId, BuildContext context, WidgetRef ref) async {
+    final mapStateNotifier = ref.read(mapProvider);
 
     final placeRes = await http.get(Uri.parse(
         'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey'));
     final Map<String, dynamic> placeData = jsonDecode(placeRes.body);
     if (placeData["result"] == null || placeData["result"]["photos"] == null) {
-      mapProvider.addBodyUrl(
+      mapStateNotifier.addBodyUrl(
           "https://www.shoshinsha-design.com/wp-content/uploads/2020/05/noimage-760x460.png");
       return;
     }
     final List photos = placeData["result"]["photos"];
     if (photos.isEmpty) {
-      mapProvider.addBodyUrl(
+      mapStateNotifier.addBodyUrl(
           "https://www.shoshinsha-design.com/wp-content/uploads/2020/05/noimage-760x460.png");
 
       return;
@@ -84,7 +87,7 @@ class MapRepository {
       final photoReference = photo['photo_reference'];
       final url =
           "https://maps.googleapis.com/maps/api/place/photo?maxwidth=700&photoreference=$photoReference&key=$apiKey";
-      mapProvider.addBodyUrl(url);
+      mapStateNotifier.addBodyUrl(url);
     }
   }
 }
