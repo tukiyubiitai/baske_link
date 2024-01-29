@@ -2,23 +2,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'account.freezed.dart';
 
-// class Account {
-//   String id;
-//   String name;
-//   String? myToken;
-//   String? imagePath;
-//
-//   List<String>? blockList;
-//
-//   Account({
-//     required this.id,
-//     required this.name,
-//     this.myToken,
-//     this.imagePath,
-//     this.blockList,
-//   });
-// }
-
 @freezed
 class Account with _$Account {
   const factory Account({
