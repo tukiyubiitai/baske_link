@@ -11,6 +11,8 @@ import '../../models/talk/talkroom.dart';
 import '../../utils/error_handler.dart';
 import 'authentication_service.dart';
 
+///アカウント情報
+
 class AccountFirestore {
   static final _firestoreInstance = FirebaseFirestore.instance;
   static final CollectionReference users =
