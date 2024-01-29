@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:basketball_app/models/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../infrastructure/image_processing/image_processing_utils.dart';
 import '../../../models/account/account_state.dart';
 import '../../../utils/error_handler.dart';
@@ -16,7 +17,7 @@ import '../../widgets/account/user_profile_circle.dart';
 import '../../widgets/bottom_navigation.dart';
 import '../../widgets/progress_indicator.dart';
 
-///新規アカウント作成ページ
+///新規アカウント作成ページUI
 class CreateAccount extends ConsumerStatefulWidget {
   const CreateAccount({super.key});
 
