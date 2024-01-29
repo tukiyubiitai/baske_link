@@ -10,7 +10,7 @@ import '../state/providers/map/map_provider.dart';
 import '../utils/map_api_key.dart';
 
 class MapRepository {
-  //バスケットコートのデータを取得
+  //バスケットコートのデータを取得する
   Future<Locations?> getCourt(
     double latitude,
     double longitude,
