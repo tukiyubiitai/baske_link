@@ -1,5 +1,5 @@
 import 'package:basketball_app/infrastructure/storage.dart';
-import 'package:basketball_app/views/auth/login_and_signup_page.dart';
+import 'package:basketball_app/views/auth/first_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

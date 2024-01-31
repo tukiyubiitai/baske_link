@@ -7,7 +7,7 @@ import '../../../utils/error_handler.dart';
 import '../../dialogs/dialogs.dart';
 import '../../dialogs/snackbar_utils.dart';
 import '../../view_models/account_view_model.dart';
-import '../../views/auth/login_and_signup_page.dart';
+import '../../views/auth/first_page.dart';
 
 // ユーザーのアクション（ログアウトやアカウント削除）を提供するメニューを表示するウィジェット
 class UserActionsMenu extends ConsumerWidget {
