@@ -86,7 +86,7 @@ class _MyPageState extends ConsumerState<MyUserPage>
             color: Colors.indigo[900],
             child: Column(
               children: [
-                myAccount.imagePath != "" && myAccount.imagePath != null
+                myAccount.imagePath != ""
                     //画像がある場合
                     ? AccountCircleWidget(
                         imagePath: myAccount.imagePath.toString(),

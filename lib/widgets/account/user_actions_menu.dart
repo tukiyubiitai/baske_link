@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,8 +6,6 @@ import '../../../models/choice_model.dart';
 import '../../../utils/error_handler.dart';
 import '../../dialogs/dialogs.dart';
 import '../../dialogs/snackbar_utils.dart';
-import '../../models/auth/auth_status.dart';
-import '../../state/providers/auth/auth_notifier.dart';
 import '../../view_models/account_view_model.dart';
 import '../../views/auth/login_and_signup_page.dart';
 
@@ -37,7 +36,7 @@ class UserActionsMenu extends ConsumerWidget {
             title: 'ログアウト',
             message: '本当にログアウトしますか？',
             onConfirm: () async {
-              // await signOut(authenticationRepository, ref);
+              await signOut(ref);
             },
           );
         } else if (choice.title == 'アカウント削除') {
@@ -45,7 +44,7 @@ class UserActionsMenu extends ConsumerWidget {
           await _showConfirmDialog(
             context: context,
             title: 'アカウント削除',
-            message: 'データは復元できませんがよろしいですか？',
+            message: 'データは復元できませんがよろしいですか？\nアカウント削除のため再認証が行われます',
             onConfirm: () async =>
                 //アカウント削除
                 await deleteUser(ref),
@@ -109,7 +108,7 @@ class UserActionsMenu extends ConsumerWidget {
   void _navigateToLogin(BuildContext context) {
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => const LoginAndSignupPage()),
+      MaterialPageRoute(builder: (context) => const FirstPage()),
       (route) => false,
     );
   }
@@ -132,18 +131,8 @@ class UserActionsMenu extends ConsumerWidget {
   }
 
   //サインインページの前にもう一個新しい画面を追加する予定
-  Future<void> signOut(
-    WidgetRef ref,
-  ) async {
-    // signOutメソッドを呼び出し
-    await ref.read(authStateNotifierProvider.notifier).signOut();
-
-    // 認証状態を取得
-    final authStatus = ref.read(authStateNotifierProvider);
-
-    // AuthStatus.accountNotCreatedの場合に_navigateToLoginを呼び出す
-    if (authStatus == AuthStatus.unauthenticated) {
-      _navigateToLogin(ref.context);
-    }
+  Future<void> signOut(WidgetRef ref) async {
+    await FirebaseAuth.instance.signOut();
+    _navigateToLogin(ref.context);
   }
 }

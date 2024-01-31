@@ -23,16 +23,11 @@ class AuthStateNotifier extends _$AuthStateNotifier {
         //トークン更新
         AuthenticationService().updateUserToken(user);
         ref.read(accountNotifierProvider.notifier).updateAccount(userAccount);
-        // AuthenticationService.updateMyAccount(userAccount);
         ref.read(accountStateNotifierProvider.notifier).updateAll(userAccount);
         return AuthStatus.authenticated; // 認証され、Firestoreにデータがある
       } else {
         return AuthStatus.accountNotCreated; // アカウントはあるが、Firestoreにデータがない
       }
-      // final AuthStatus status =
-      //     await AuthViewModel().signIn(ref); //アカウント情報を状態管理
-
-      // return status;
     } catch (e, stack) {
       throw AsyncError(e, stack);
     }

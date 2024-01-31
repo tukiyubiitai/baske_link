@@ -94,20 +94,20 @@ class GamePostViewModel extends ChangeNotifier {
 
   //gamePost更新
   Future<bool> updateGamePost(String postId, WidgetRef ref) async {
-    var gameState = ref.read(gameStateNotifierProvider);
-    var ageState = ref.read(ageStateProvider);
-    final tagProvider = ref.read(tagAreaStateProvider);
+    var gamePostState = ref.read(gameStateNotifierProvider);
+    var ageTag = ref.read(ageStateProvider);
+    final locationTag = ref.read(tagAreaStateProvider);
 
     final myAccount = ref.read(accountNotifierProvider);
 
-    String teamName = gameState.teamName;
-    String prefecture = gameState.prefecture;
-    String member = gameState.member;
-    String note = gameState.note.toString();
-    int level = gameState.level;
+    String teamName = gamePostState.teamName;
+    String prefecture = gamePostState.prefecture;
+    String member = gamePostState.member;
+    String note = gamePostState.note.toString();
+    int level = gamePostState.level;
 
-    String? imageUrl = gameState.imageUrl;
-    String oldImagePath = gameState.oldImageUrl ?? '';
+    String? imageUrl = gamePostState.imageUrl;
+    String oldImagePath = gamePostState.oldImageUrl ?? '';
     // 入力検証のロジック
     if (!isValidGameState(ref)) {
       return false;
@@ -123,13 +123,13 @@ class GamePostViewModel extends ChangeNotifier {
 
       GamePost updatePost = GamePost(
         postAccountId: myAccount.id,
-        locationTagList: tagProvider,
+        locationTagList: locationTag,
         teamName: teamName,
         level: level,
         prefecture: prefecture,
         createdTime: Timestamp.now(),
         member: member,
-        ageList: ageState,
+        ageList: ageTag,
         type: 'game',
         imageUrl: url,
         note: note,
@@ -198,40 +198,40 @@ class GamePostViewModel extends ChangeNotifier {
 
   //入力チェック
   bool isValidGameState(WidgetRef ref) {
-    var gameState = ref.read(gameStateNotifierProvider);
+    var gamePostState = ref.read(gameStateNotifierProvider);
 
-    String teamName = gameState.teamName;
-    String ageString = gameState.ageString;
-    String prefecture = gameState.prefecture;
+    String teamName = gamePostState.teamName;
+    String ageString = gamePostState.ageString;
+    String prefecture = gamePostState.prefecture;
 
-    String locationTagString = gameState.locationTagString;
-    int level = gameState.level;
+    String locationTagString = gamePostState.locationTagString;
+    int level = gamePostState.level;
 
-    if (gameState.teamName.isEmpty || teamName.isEmpty) {
+    if (gamePostState.teamName.isEmpty || teamName.isEmpty) {
       showErrorSnackBar(context: ref.context, text: "チーム名が入力されていません");
       return false;
     }
 
-    if (gameState.teamName.length < 2 || teamName.length < 2) {
+    if (gamePostState.teamName.length < 2 || teamName.length < 2) {
       showErrorSnackBar(context: ref.context, text: "チーム名が短いです");
       return false;
     }
-    if (gameState.locationTagString.isEmpty || locationTagString == []) {
+    if (gamePostState.locationTagString.isEmpty || locationTagString == []) {
       showErrorSnackBar(context: ref.context, text: "詳しい活動場所が入力されていません");
       return false;
     }
 
-    if (gameState.ageString.isEmpty || ageString.isEmpty) {
+    if (gamePostState.ageString.isEmpty || ageString.isEmpty) {
       showErrorSnackBar(context: ref.context, text: "年齢層が選択されていません");
       return false;
     }
 
-    if (gameState.level == 0.0 || level == 0.0) {
+    if (gamePostState.level == 0.0 || level == 0.0) {
       showErrorSnackBar(context: ref.context, text: "レベルが選択されていません");
       return false;
     }
 
-    if (gameState.prefecture.isEmpty || prefecture.isEmpty) {
+    if (gamePostState.prefecture.isEmpty || prefecture.isEmpty) {
       showErrorSnackBar(context: ref.context, text: "エリアが入力されていません");
       return false;
     }

@@ -14,9 +14,8 @@ class AuthViewModel extends ChangeNotifier {
 
   /// ユーザー認証を行い、その存在をFirebaseで確認します。
   /// [user] - ユーザー認証の結果。
-  /// [ref] - WidgetRefを使用して、Providerから状態を読み取るために使用されます。
   /// 戻り値はユーザーが存在する場合はtrue、そうでない場合はfalseです。
-  Future<bool> authenticateUser(UserCredential? user, WidgetRef ref) async {
+  Future<bool> authenticateUser(UserCredential? user) async {
     if (user != null) {
       // firebaseにユーザーが存在するか確認
       bool userExists = await AccountFirestore.checkUserExists(user.user!.uid);
@@ -32,7 +31,7 @@ class AuthViewModel extends ChangeNotifier {
     try {
       LoadingManager.instance.startLoading(ref);
       UserCredential? user = await authenticateWithApple();
-      return await authenticateUser(user, ref);
+      return await authenticateUser(user);
     } catch (e) {
       AppLogger.instance.error("サインインに失敗 $e");
       ErrorHandler.instance.setErrorState(ref, getErrorMessage(e));
@@ -47,28 +46,39 @@ class AuthViewModel extends ChangeNotifier {
   /// 戻り値はサインイン成功時にtrue、失敗時にfalseです。
   Future<bool> signInWithGoogle(WidgetRef ref) async {
     try {
+      //ロード開始
       LoadingManager.instance.startLoading(ref);
       UserCredential? user = await authenticateWithGoogle();
-      return await authenticateUser(user, ref);
+      return await authenticateUser(user);
     } catch (e) {
+      //エラーハンドリング
       AppLogger.instance.error("サインインに失敗 $e");
       ErrorHandler.instance.setErrorState(ref, getErrorMessage(e));
       return false;
     } finally {
+      //ロード開始
       LoadingManager.instance.stopLoading(ref);
     }
   }
 
-  /// ユーザーのサインアウトを行います。
-  /// Webプラットフォームではない場合、Googleアカウントからもサインアウトします。
-  /// 戻り値はサインアウトが成功したかどうかです。
-  Future<bool> signOut() async {
-    final GoogleSignIn googleSignIn = GoogleSignIn();
-    if (!kIsWeb) {
-      await googleSignIn.signOut();
+  Future<bool> signInWithGoogles(WidgetRef ref) async {
+    try {
+      //ロード開始
+      LoadingManager.instance.startLoading(ref);
+      UserCredential? user = await authenticateWithGoogle();
+      if (user != null) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      //エラーハンドリング
+      AppLogger.instance.error("サインインに失敗 $e");
+      ErrorHandler.instance.setErrorState(ref, getErrorMessage(e));
+      return false;
+    } finally {
+      //ロード開始
+      LoadingManager.instance.stopLoading(ref);
     }
-    await auth.signOut();
-    return true;
   }
 
   /// Appleでのサインインプロセスを実行するメソッドです。
@@ -132,5 +142,17 @@ class AuthViewModel extends ChangeNotifier {
       return userCredential;
     }
     return null;
+  }
+
+  /// ユーザーのサインアウトを行います。
+  /// Webプラットフォームではない場合、Googleアカウントからもサインアウトします。
+  /// 戻り値はサインアウトが成功したかどうかです。
+  Future<bool> signOut() async {
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    if (!kIsWeb) {
+      await googleSignIn.signOut();
+    }
+    await auth.signOut();
+    return true;
   }
 }

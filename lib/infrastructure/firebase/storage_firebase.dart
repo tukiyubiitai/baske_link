@@ -8,10 +8,14 @@ import '../../utils/error_handler.dart';
 class ImageManager {
   // Firebase Storageから指定された画像を削除する
   static Future<void> deleteImage(String fileUrl) async {
-    Reference ref = FirebaseStorage.instance.refFromURL(fileUrl);
-    await ref.delete();
+    try {
+      Reference ref = FirebaseStorage.instance.refFromURL(fileUrl);
+      await ref.delete();
 
-    print("画像を削除しました: $fileUrl");
+      print("画像を削除しました: $fileUrl");
+    } catch (e) {
+      Logger().e("プロフィール画像の削除に失敗しました, $e");
+    }
   }
 
   // 画像をFirebase Storageにアップロードし、ダウンロードURLを返す

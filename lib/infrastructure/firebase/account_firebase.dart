@@ -231,7 +231,7 @@ class AccountFirestore {
   Future<bool> deleteCurrentUser(Account myAccount) async {
     final myAccountId = myAccount.id; // ユーザーのUIDを取得
     List<TalkRoom?> talkRooms = [];
-    String oldImagePath = myAccount.imagePath ?? '';
+    String oldImagePath = myAccount.imagePath;
     try {
       if (oldImagePath.isNotEmpty) {
         await ImageManager.deleteImage(oldImagePath); // deleteImage 関数を呼び出す
@@ -260,8 +260,23 @@ class AccountFirestore {
           .doc(myAccountId)
           .delete();
 
-      print('ユーザー情報を削除しました!');
-      await auth.signOut();
+      // 現在のユーザーを取得
+      User? user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        final String? userInfo =
+            AuthenticationService().checkAuthProvider(user);
+        if (userInfo == "google") {
+          // Googleの再認証プロセス
+          await AuthenticationService().reAuthenticateWithGoogle();
+        } else if (userInfo == "apple") {
+          // Appleの再認証プロセス
+          await AuthenticationService().reAuthenticateWithApple();
+        }
+        // ユーザーアカウントの削除
+        await user.delete();
+        print("アカウントが削除されました");
+      }
       return true;
     } catch (e) {
       Logger().e("ユーザー削除失敗: $e,");

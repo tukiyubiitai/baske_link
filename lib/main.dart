@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       // home: LoginAndSignupPage(),
-      home: LoginAndSignupPage(),
+      home: FirstPage(),
     );
   }
 }

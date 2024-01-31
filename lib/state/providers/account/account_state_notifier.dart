@@ -2,12 +2,14 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../models/account/account.dart';
 import '../../../../models/account/account_state.dart';
+
 part 'account_state_notifier.g.dart';
 
 @riverpod
 class AccountStateNotifier extends _$AccountStateNotifier {
   @override
   AccountState build() {
+    print(AccountState);
     return AccountState();
   }
 
@@ -35,13 +37,13 @@ class AccountStateNotifier extends _$AccountStateNotifier {
     state = state.copyWith(isEditing: isEditing);
   }
 
-  void updateAll(Account newAccount) {
+  void updateAll(Account newAccount) async {
     state = state.copyWith(
-      id: newAccount.id ?? state.id,
-      name: newAccount.name ?? state.name,
-      imagePath: newAccount.imagePath ?? state.imagePath,
-      blockList: newAccount.blockList ?? state.blockList,
-      myToken: newAccount.myToken ?? state.myToken,
+      id: newAccount.id,
+      name: newAccount.name,
+      imagePath: newAccount.imagePath,
+      blockList: newAccount.blockList,
+      myToken: newAccount.myToken,
     );
   }
 }
