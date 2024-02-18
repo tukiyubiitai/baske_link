@@ -12,7 +12,6 @@ import '../../dialogs/snackbar.dart';
 import '../../models/account/account.dart';
 import '../../models/color/app_colors.dart';
 import '../../state/providers/providers.dart';
-import '../../widgets/account/custom_text_fields.dart';
 import '../../widgets/account/user_profile_circle.dart';
 import '../../widgets/common_widgets/back_button_widget.dart';
 import '../../widgets/progress_indicator.dart';
@@ -48,9 +47,12 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
     final accountState = ref.watch(accountManagerProvider);
     final bottomSpace = MediaQuery.of(context).viewInsets.bottom;
 
-    // アカウント作成成功後の画面遷移
+    // アカウント更新成功後の画面遷移
     ref.listen<AccountState>(accountManagerProvider, (_, state) {
-      _handleAccountCreation(state);
+      // isAccountCreatedSuccessfullyがtrueに変わった場合にのみ実行
+      if (state.updateIsEditing) {
+        _handleAccountCreation(state);
+      }
     });
 
     // ローディング中でない場合、UIを表示
@@ -141,10 +143,17 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
   Widget _buildNameTextField() {
     return SizedBox(
       width: 300,
-      child: CustomTextFiled(
+      child: TextField(
         controller: _nameController,
-        func: (value) =>
-            ref.read(accountManagerProvider.notifier).onUserNameChange(value),
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+        maxLength: 10,
+        decoration: InputDecoration(
+          hintText: "ユーザー名 (必須)",
+          hintStyle: const TextStyle(
+              color: Colors.black, fontWeight: FontWeight.normal),
+        ),
       ),
     );
   }

@@ -10,7 +10,6 @@ import '../../bottom_navigation.dart';
 import '../../dialogs/snackbar.dart';
 import '../../models/account/account.dart';
 import '../../state/providers/providers.dart';
-import '../../widgets/account/custom_text_fields.dart';
 import '../../widgets/account/user_profile_circle.dart';
 import '../../widgets/progress_indicator.dart';
 
@@ -39,7 +38,10 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
 
     // アカウント作成成功後の画面遷移
     ref.listen<AccountState>(accountManagerProvider, (_, state) {
-      _handleAccountCreation(state);
+      // isAccountCreatedSuccessfullyがtrueに変わった場合にのみ実行
+      if (state.isAccountCreatedSuccessfully) {
+        _handleAccountCreation(state);
+      }
     });
 
     // ローディング中でない場合、UIを表示
@@ -124,8 +126,17 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
   Widget _buildNameTextField() {
     return SizedBox(
       width: 300,
-      child: CustomTextFiled(
+      child: TextField(
         controller: _nameController,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+        maxLength: 10,
+        decoration: InputDecoration(
+          hintText: "ユーザー名 (必須)",
+          hintStyle: const TextStyle(
+              color: Colors.black, fontWeight: FontWeight.normal),
+        ),
       ),
     );
   }
@@ -135,6 +146,10 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
       padding: const EdgeInsets.all(8.0),
       child: ElevatedButton(
         onPressed: () async {
+          if (_nameController.text.isEmpty) {
+            showErrorSnackBar(context: context, text: "名前が入力されていないです");
+            return;
+          }
           ref
               .read(accountManagerProvider.notifier)
               .onUserNameChange(_nameController.text);
@@ -161,6 +176,7 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
   //画面遷移
   void _handleAccountCreation(AccountState state) {
     if (state.isAccountCreatedSuccessfully) {
+      state = state.copyWith(isAccountCreatedSuccessfully: false);
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
@@ -174,6 +190,8 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
         backgroundColor: Colors.white,
         textColor: Colors.black,
       );
+    } else {
+      return;
     }
   }
 
