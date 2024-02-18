@@ -72,10 +72,14 @@ class _TalkPageState extends ConsumerState<TalkPage> {
       body: Stack(
         children: [
           messageAsyncValue.when(
-            error: (e, stack) {
-              debugPrint(e.toString());
-              return Center(child: Text('エラーが発生しました: $e'));
-            },
+            error: (e, stack) => Center(
+              child: Text(
+                '予期せぬエラーが発生しました\nアプリを再起動させて下さい',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+            ),
             loading: () => ShowProgressIndicator(
               textColor: Colors.black,
               indicatorColor: Colors.indigo,

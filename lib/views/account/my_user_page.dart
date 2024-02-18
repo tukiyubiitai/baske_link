@@ -53,6 +53,9 @@ class _MyPageState extends ConsumerState<MyUserPage>
 
   // ユーザー設定ページへのナビゲーションを行う
   void navigateToUserSettingsPage() {
+    final myAccount = ref.read(accountNotifierProvider);
+
+    ref.read(accountStateNotifierProvider.notifier).updateAll(myAccount);
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => UserSettingPage()),
@@ -63,6 +66,7 @@ class _MyPageState extends ConsumerState<MyUserPage>
   Widget build(BuildContext context) {
     final myAccount = ref.read(accountNotifierProvider);
     double screenHeight = MediaQuery.of(context).size.height; // 画面の高さを取得
+    ref.watch(accountStateNotifierProvider);
 
     // チーム投稿とゲーム投稿の状態を監視
     ref.watch(myTeamPostNotifierProvider(myAccount));

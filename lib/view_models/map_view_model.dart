@@ -20,10 +20,45 @@ class MapViewModel extends ChangeNotifier {
   final MapModel model = MapModel();
   Position? currentPosition;
 
+  //位置情報の許可をリクエストする
+  Future<void> loadCurrentLocation(WidgetRef ref) async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      await Geolocator.requestPermission();
+    }
+    await getCurrentLocation(ref);
+  }
+
+  //最初にマップが作成される時に呼ばれる
+  Future<void> onMapCreated(
+      GoogleMapController controller, WidgetRef ref) async {
+    final mapStateNotifier = ref.read(mapProvider);
+    //選択されたcourt番号をnullにもどす
+    mapStateNotifier.clearSelect();
+
+    mapStateNotifier.addMapController(controller);
+    if (mapStateNotifier.currentPosition != null) {
+      final zoomLevel = await mapStateNotifier.mapController!.getZoomLevel();
+      //スワイプ後のcourtの座標までカメラを移動
+      mapStateNotifier.mapController!.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(mapStateNotifier.currentPosition!.latitude,
+                mapStateNotifier.currentPosition!.longitude),
+            zoom: zoomLevel,
+          ),
+        ),
+      );
+      // await setMarkers(ref);
+    }
+    //map読み込み完了を通知
+    mapStateNotifier.setLoadMap(true);
+  }
+
   /// 現在地を取得し、マップに反映する。
   /// [context] - 現在のビルドコンテキスト。
   /// [ref] - WidgetRefを使用して、Providerから状態を読み取るために使用。
-  Future<void> getCurrentLocation(BuildContext context, WidgetRef ref) async {
+  Future<void> getCurrentLocation(WidgetRef ref) async {
     final mapStateNotifier = ref.read(mapProvider);
     try {
       //mapModelから現在位置が返ってくる
@@ -58,13 +93,13 @@ class MapViewModel extends ChangeNotifier {
   }
 
   //画面の中央の座標を取得する
-  Future<LatLng> getMiddlePoint(BuildContext context, WidgetRef ref) async {
+  Future<LatLng> getMiddlePoint(WidgetRef ref) async {
     try {
       final mapStateNotifier = ref.read(mapProvider);
-      double screenWidth = MediaQuery.of(context).size.width *
-          MediaQuery.of(context).devicePixelRatio;
-      double screenHeight = MediaQuery.of(context).size.height *
-          MediaQuery.of(context).devicePixelRatio;
+      double screenWidth = MediaQuery.of(ref.context).size.width *
+          MediaQuery.of(ref.context).devicePixelRatio;
+      double screenHeight = MediaQuery.of(ref.context).size.height *
+          MediaQuery.of(ref.context).devicePixelRatio;
 
       double middleX = screenWidth / 2;
       double middleY = screenHeight / 2;
@@ -86,20 +121,15 @@ class MapViewModel extends ChangeNotifier {
   /// それらの位置にマーカーを設置します。
   /// [latitude] または [longitude] が null の場合、既存のマーカーをクリアします。
   /// [ref] - WidgetRefを使用して、Providerから状態を読み取り、更新します。
-  Future<void> setMarkers(
-      double? latitude, double? longitude, WidgetRef ref) async {
+  Future<void> setMarkers(WidgetRef ref) async {
     final mapStateNotifier = ref.read(mapProvider);
-
-    // 座標がnullの場合はマーカーをクリアして早期リターン
-    if (latitude == null || longitude == null) {
-      mapStateNotifier.clearMakers();
-      return;
-    }
+    LatLng center = await getMiddlePoint(ref);
 
     mapStateNotifier.setLoading(true); // ロード開始
 
     try {
-      final locations = await MapRepository().getCourt(latitude, longitude);
+      final locations =
+          await MapRepository().getCourt(center.latitude, center.longitude);
 
       // バスケコートの情報が取得できない場合
       if (locations == null || locations.results.isEmpty) {
@@ -117,10 +147,12 @@ class MapViewModel extends ChangeNotifier {
       mapStateNotifier.clearMakers();
       //urlクリア
       mapStateNotifier.clearUrls();
+      //アドレスリストクリア
+      mapStateNotifier.clearAddress();
 
       // コートの画像を非同期に並列で取得し、マーカーを作成
       await Future.wait(locations.results.map((court) async {
-        await MapRepository().fetchPhoto(court.place_id, ref.context, ref);
+        await MapRepository().fetchPhotos(court.place_id, ref);
 
         final marker = Marker(
           markerId: MarkerId(court.place_id),
@@ -137,6 +169,19 @@ class MapViewModel extends ChangeNotifier {
       ErrorHandler.instance.setErrorState(ref, getErrorMessage(e));
     } finally {
       mapStateNotifier.setLoading(false); // ロード完了
+    }
+  }
+
+  void moveToCurrentPosition(WidgetRef ref) {
+    // 現在位置にカメラを移動するロジック
+    final mapStateNotifier = ref.read(mapProvider);
+    if (mapStateNotifier.currentPosition != null) {
+      mapStateNotifier.mapController!.animateCamera(
+        CameraUpdate.newLatLng(
+          LatLng(mapStateNotifier.currentPosition!.latitude,
+              mapStateNotifier.currentPosition!.longitude),
+        ),
+      );
     }
   }
 

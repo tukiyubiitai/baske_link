@@ -17,7 +17,7 @@ final authViewModelProvider = ChangeNotifierProvider((ref) {
   return AuthViewModel();
 });
 
-final mapViewModel = ChangeNotifierProvider((ref) {
+final mapViewModelProvider = ChangeNotifierProvider((ref) {
   return MapViewModel();
 });
 

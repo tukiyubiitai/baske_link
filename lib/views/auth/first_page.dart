@@ -3,9 +3,9 @@ import 'package:basketball_app/models/auth/auth_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../bottom_navigation.dart';
 import '../../state/providers/auth/auth_notifier.dart';
 import '../../state/providers/global_loader.dart';
-import '../../widgets/bottom_navigation.dart';
 import '../../widgets/progress_indicator.dart';
 import '../account/create_account_page.dart';
 import 'sign_in_screen.dart';
@@ -21,10 +21,14 @@ class FirstPage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.baseColor,
       body: authAsyncValue.when(
-        error: (e, stack) {
-          debugPrint(e.toString());
-          return Center(child: Text('エラーが発生しました: $e'));
-        },
+        error: (e, stack) => Center(
+          child: Text(
+            '予期せぬエラーが発生しました\nアプリを再起動させて下さい',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+        ),
         loading: () => ShowProgressIndicator(
           textColor: Colors.white,
           indicatorColor: Colors.white,

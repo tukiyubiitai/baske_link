@@ -24,7 +24,14 @@ class MyGamePosts extends ConsumerWidget {
         textColor: Colors.white,
         indicatorColor: Colors.white,
       ),
-      error: (e, stack) => Text('エラーが発生しました: $e'),
+      error: (e, stack) => Center(
+        child: Text(
+          '予期せぬエラーが発生しました\nアプリを再起動させて下さい',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+      ),
       data: (myGamePosts) {
         if (myGamePosts == null || myGamePosts.isEmpty) {
           return Center(

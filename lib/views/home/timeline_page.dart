@@ -36,14 +36,6 @@ class _TimelinePageState extends State<TimelinePage> {
                         children: [
                           ElevatedButton(
                             onPressed: () {
-                              // _clearTags();
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //       builder: (context) => const TeamPostPage(
-                              //             isEditing: false,
-                              //           )),
-                              // );
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(

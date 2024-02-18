@@ -1,11 +1,11 @@
+import 'package:basketball_app/widgets/map/court_detail_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../repository/map_repository.dart';
-import '../../dialogs/snackbar_utils.dart';
 import '../../state/providers/map/map_provider.dart';
-import '../../view_models/map_view_model.dart';
+import '../progress_indicator.dart';
 
 class ListSection extends ConsumerStatefulWidget {
   const ListSection({super.key});
@@ -96,8 +96,8 @@ class _ListSectionState extends ConsumerState<ListSection> {
         final marker = mapStateNotifier.markers.values.toList()[index];
         final imageUrl = mapStateNotifier.urls[index].toString();
         final courtAddress = mapStateNotifier.addressList[index];
-        double? courtPositionLatitude;
-        double? courtPositionLongitude;
+        // double? courtPositionLatitude;
+        // double? courtPositionLongitude;
         // カードウィジェットを生成
         return mapStateNotifier.loading
             ? Container(
@@ -126,6 +126,17 @@ class _ListSectionState extends ConsumerState<ListSection> {
                           child: Image.network(
                             imageUrl,
                             fit: BoxFit.cover,
+                            loadingBuilder: (BuildContext context, Widget child,
+                                ImageChunkEvent? loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return ShowProgressIndicator(
+                                indicatorColor: Colors.blue,
+                              );
+                            },
+                            errorBuilder: (BuildContext context, Object error,
+                                StackTrace? stackTrace) {
+                              return Text('画像の読み込みに失敗しました');
+                            },
                           ),
                         ),
                       ),
@@ -156,7 +167,7 @@ class _ListSectionState extends ConsumerState<ListSection> {
                                 final tappedMarker = marker;
                                 final placeId = tappedMarker.markerId.value;
                                 await MapRepository()
-                                    .fetchDetailPhoto(placeId, context, ref);
+                                    .fetchDetailPhoto(placeId, ref);
                                 showModalBottomSheet(
                                   context: context,
                                   shape: const RoundedRectangleBorder(
@@ -165,88 +176,93 @@ class _ListSectionState extends ConsumerState<ListSection> {
                                     ),
                                   ),
                                   builder: (BuildContext context) {
-                                    return SizedBox(
-                                      width: double.infinity,
-                                      child: Column(
-                                        children: [
-                                          const SizedBox(
-                                            height: 30,
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 20.0),
-                                            child: Text(
-                                              marker.infoWindow.title
-                                                  .toString(),
-                                              style: const TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                              maxLines: 3,
-                                              softWrap: true,
-                                            ),
-                                          ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceAround,
-                                            children: [
-                                              // シェアボタン
-                                              _buildIconButtonWithText(
-                                                Icons.share,
-                                                "シェアする",
-                                                () async {
-                                                  await MapViewModel()
-                                                      .shareImage(
-                                                          imageUrl,
-                                                          marker
-                                                              .infoWindow.title
-                                                              .toString());
-                                                },
-                                              ),
-                                              // Googleマップで開くボタン
-                                              _buildIconButtonWithText(
-                                                Icons.navigation,
-                                                "google mapで開く",
-                                                () async {
-                                                  await MapViewModel()
-                                                      .handleUrlAction(
-                                                          courtPositionLatitude!,
-                                                          courtPositionLongitude!,
-                                                          context,
-                                                          ref);
-                                                },
-                                              ),
-                                              // お気に入りボタン
-                                              _buildIconButtonWithText(
-                                                Icons.favorite,
-                                                "お気に入り",
-                                                () {
-                                                  Navigator.of(context).pop();
-                                                  showSnackBar(
-                                                    context: context,
-                                                    text:
-                                                        'ごめんなさい。その機能は開発中です(T . T)',
-                                                    backgroundColor:
-                                                        Colors.indigo,
-                                                    textColor: Colors.white,
-                                                  );
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(
-                                            height: 20,
-                                          ),
-                                          // コートの場所の住所
-                                          _buildCourtLocation(courtAddress),
-                                          const SizedBox(
-                                            height: 20,
-                                          ),
-                                          // コートの写真を表示
-                                          _buildPhotoPageView(context),
-                                        ],
-                                      ),
-                                    );
+                                    return CourtDetailSheet(
+                                        imageUrl: imageUrl,
+                                        courtAddress: courtAddress,
+                                        marker: marker,
+                                        ref: ref);
+                                    // return SizedBox(
+                                    //   width: double.infinity,
+                                    //   child: Column(
+                                    //     children: [
+                                    //       const SizedBox(
+                                    //         height: 30,
+                                    //       ),
+                                    //       Padding(
+                                    //         padding: const EdgeInsets.symmetric(
+                                    //             horizontal: 20.0),
+                                    //         child: Text(
+                                    //           marker.infoWindow.title
+                                    //               .toString(),
+                                    //           style: const TextStyle(
+                                    //             fontSize: 20,
+                                    //             fontWeight: FontWeight.bold,
+                                    //           ),
+                                    //           maxLines: 3,
+                                    //           softWrap: true,
+                                    //         ),
+                                    //       ),
+                                    //       Row(
+                                    //         mainAxisAlignment:
+                                    //             MainAxisAlignment.spaceAround,
+                                    //         children: [
+                                    //           // シェアボタン
+                                    //           _buildIconButtonWithText(
+                                    //             Icons.share,
+                                    //             "シェアする",
+                                    //             () async {
+                                    //               await MapViewModel()
+                                    //                   .shareImage(
+                                    //                       imageUrl,
+                                    //                       marker
+                                    //                           .infoWindow.title
+                                    //                           .toString());
+                                    //             },
+                                    //           ),
+                                    //           // Googleマップで開くボタン
+                                    //           _buildIconButtonWithText(
+                                    //             Icons.navigation,
+                                    //             "google mapで開く",
+                                    //             () async {
+                                    //               await MapViewModel()
+                                    //                   .handleUrlAction(
+                                    //                       courtPositionLatitude!,
+                                    //                       courtPositionLongitude!,
+                                    //                       context,
+                                    //                       ref);
+                                    //             },
+                                    //           ),
+                                    //           // お気に入りボタン
+                                    //           _buildIconButtonWithText(
+                                    //             Icons.favorite,
+                                    //             "お気に入り",
+                                    //             () {
+                                    //               Navigator.of(context).pop();
+                                    //               showSnackBar(
+                                    //                 context: context,
+                                    //                 text:
+                                    //                     'ごめんなさい。その機能は開発中です(T . T)',
+                                    //                 backgroundColor:
+                                    //                     Colors.indigo,
+                                    //                 textColor: Colors.white,
+                                    //               );
+                                    //             },
+                                    //           ),
+                                    //         ],
+                                    //       ),
+                                    //       const SizedBox(
+                                    //         height: 20,
+                                    //       ),
+                                    //       // コートの場所の住所
+                                    //       _buildCourtLocation(courtAddress),
+                                    //       const SizedBox(
+                                    //         height: 20,
+                                    //       ),
+                                    //       // コートの写真を表示
+                                    //       _buildPhotoPageView(context),
+                                    //     ],
+                                    //   ),
+                                    // );
                                   },
                                 );
                               },
@@ -267,79 +283,6 @@ class _ListSectionState extends ConsumerState<ListSection> {
                 ),
               );
       },
-    );
-  }
-
-  // アイコンとテキストを含むボタンウィジェットを生成
-  Widget _buildIconButtonWithText(
-      IconData icon, String text, VoidCallback onPressed) {
-    return Column(
-      children: [
-        IconButton(
-          onPressed: onPressed,
-          icon: Icon(
-            icon,
-            color: Colors.blue,
-          ),
-        ),
-        Text(
-          text,
-          style: const TextStyle(color: Colors.blue),
-        ),
-      ],
-    );
-  }
-
-  // コートの場所情報ウィジェットを生成
-  Widget _buildCourtLocation(String courtAddress) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.grey,
-          width: 0.5,
-        ),
-      ),
-      child: ListTile(
-        leading: const Icon(Icons.map, color: Colors.blue, size: 25),
-        title: Text(
-          courtAddress
-              .replaceFirst("日本、〒", "")
-              .replaceAll(RegExp(r'\d{3}-\d{4}'), ''),
-          style: const TextStyle(fontSize: 14),
-        ),
-      ),
-    );
-  }
-
-  // 写真のページビューウィジェットを生成
-  Widget _buildPhotoPageView(BuildContext context) {
-    final mapNotifier = ref.read(mapProvider);
-
-    return Expanded(
-      child: Container(
-        child: PageView.builder(
-          controller: PageController(viewportFraction: 0.6),
-          itemCount: mapNotifier.bodyUrls.length,
-          itemBuilder: (BuildContext context, int index) {
-            final image = mapNotifier.bodyUrls[index];
-            return Container(
-              padding: const EdgeInsets.all(9),
-              child: _photoItem(image),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-// 写真ウィジェットを生成
-  Widget _photoItem(String image) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10.0),
-      child: Image.network(
-        image,
-        fit: BoxFit.cover,
-      ),
     );
   }
 }

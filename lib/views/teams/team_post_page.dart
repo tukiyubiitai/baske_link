@@ -17,7 +17,7 @@ import '../../state/providers/post/target_notifier.dart';
 import '../../state/providers/team/team_post_notifier.dart';
 import '../../view_models/team_view_model.dart';
 import '../../widgets/area_dropdown_menu_widget.dart';
-import '../../widgets/bottom_navigation.dart';
+import '../../bottom_navigation.dart';
 import '../../widgets/common_widgets/back_button_widget.dart';
 import '../../widgets/post/image_widget.dart';
 import '../../widgets/posts_custom_text_fields.dart';

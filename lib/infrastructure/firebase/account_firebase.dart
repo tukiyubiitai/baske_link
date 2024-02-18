@@ -3,7 +3,6 @@ import 'package:basketball_app/infrastructure/firebase/room_firebase.dart';
 import 'package:basketball_app/infrastructure/firebase/storage_firebase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:logger/logger.dart';
 
 import '../../models/account/account.dart';
@@ -18,13 +17,13 @@ class AccountFirestore {
   static final CollectionReference users =
       _firestoreInstance.collection("users");
 
-  final fcm = FirebaseMessaging.instance;
-
-  final auth = FirebaseAuth.instance;
-
   //現在のユーザー情報の取得
   static Future<User?> getCurrentUser() async {
-    return FirebaseAuth.instance.currentUser;
+    try {
+      return FirebaseAuth.instance.currentUser;
+    } catch (e) {
+      print(e);
+    }
   }
 
   // アカウントデータの取得
@@ -88,6 +87,13 @@ class AccountFirestore {
         // 画像が削除された場合
         uploadedImageUrl = null;
         await ImageManager.deleteImage(oldImagePath);
+
+        Account updateAccount = Account(
+          id: userId,
+          name: name,
+          imagePath: "",
+        );
+        return updateAccount;
       }
       // 新しい画像URLがある場合はそれを使用し、ない場合は既存の画像URLを使用
       Account updateAccount = Account(

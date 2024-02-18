@@ -10,7 +10,7 @@ import '../../infrastructure/firebase/account_firebase.dart';
 import '../../models/account/account.dart';
 import '../../state/providers/account/account_notifier.dart';
 import '../../view_models/talk_room_view_model.dart';
-import '../bottom_navigation.dart';
+import '../../bottom_navigation.dart';
 
 class UserBlockAndReport extends ConsumerWidget {
   final Account talkUser;

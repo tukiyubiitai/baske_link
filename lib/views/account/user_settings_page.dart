@@ -9,14 +9,13 @@ import '../../../models/app_colors.dart';
 import '../../../utils/error_handler.dart';
 import '../../../utils/image_utils.dart';
 import '../../../utils/loading_manager.dart';
+import '../../bottom_navigation.dart';
 import '../../dialogs/snackbar_utils.dart';
-import '../../models/account/account_state.dart';
-import '../../state/providers/account/account_state_notifier.dart';
+import '../../state/providers/account/account_notifier.dart';
 import '../../state/providers/global_loader.dart';
 import '../../state/providers/providers.dart';
 import '../../widgets/account/custom_text_fields.dart';
 import '../../widgets/account/user_profile_circle.dart';
-import '../../widgets/bottom_navigation.dart';
 import '../../widgets/common_widgets/back_button_widget.dart';
 import '../../widgets/progress_indicator.dart';
 
@@ -48,7 +47,7 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.read(accountStateNotifierProvider); // アカウントの状態を監視
+    ref.watch(accountStateNotifierProvider);
     final loader = ref.watch(globalLoaderProvider); // ローディング状態を監視
     final bottomSpace = MediaQuery.of(context).viewInsets.bottom;
     final errorMessage = ref.watch(errorMessageProvider); //エラーを監視
@@ -57,11 +56,6 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
     if (errorMessage != null) {
       ErrorHandler.instance.showAndResetError(errorMessage, context, ref);
     }
-
-    // アカウント作成成功後の画面遷移
-    ref.listen<AccountState>(accountStateNotifierProvider, (_, state) {
-      _handleAccountCreation(state);
-    });
 
     // ローディング中でない場合、UIを表示
     return loader == false
@@ -231,14 +225,16 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
     ref
         .read(accountStateNotifierProvider.notifier)
         .onUserNameChange(_nameController.text);
-    await ref
+    final result = await ref
         .read(accountViewModelProvider.notifier)
         .updateUserAccount(isImageDeleted, ref);
+
+    _handleAccountCreation(result);
   }
 
   //画面遷移
-  void _handleAccountCreation(AccountState state) {
-    if (state.isEditing) {
+  void _handleAccountCreation(bool state) {
+    if (state == true) {
       print("画面遷移されない");
       Navigator.pushAndRemoveUntil(
         context,
@@ -253,7 +249,9 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
         backgroundColor: Colors.white,
         textColor: Colors.black,
       );
-      ref.read(accountStateNotifierProvider.notifier).onUserIsEditing(false);
+      ref
+          .read(accountStateNotifierProvider.notifier)
+          .onUserIsAccountCreatedSuccessfully(false);
     }
     print("呼ばれた");
   }
@@ -264,10 +262,8 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
       LoadingManager.instance.startLoading(ref);
       if (isDeleting) {
         // 画像削除の処理
-        if (ref.read(accountStateNotifierProvider).imagePath != null) {
-          await ImageManager.deleteImage(
-              ref.read(accountStateNotifierProvider).imagePath.toString());
-        }
+        await ImageManager.deleteImage(
+            ref.read(accountStateNotifierProvider).imagePath.toString());
         image = null;
         // myAccount.imagePath = "";
         ref.read(accountStateNotifierProvider.notifier).onUserImageChange("");

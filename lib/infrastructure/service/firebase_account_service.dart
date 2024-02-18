@@ -7,8 +7,12 @@ import '../firebase/storage_firebase.dart';
 
 class FirebaseAccountService {
   Future<User?> getCurrentUser() async {
-    // Firebaseから現在のユーザーを取得する処理
-    return AccountFirestore.getCurrentUser();
+    try {
+      return AccountFirestore.getCurrentUser();
+    } catch (e) {
+      print(e);
+    }
+    return null;
   }
 
   Future<String?> getToken() async {

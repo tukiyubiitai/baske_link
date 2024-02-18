@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../dialogs/dialogs.dart';
 import '../../models/account/account.dart';
 import '../../state/providers/account/account_notifier.dart';
@@ -39,10 +40,14 @@ class TalkRoomList extends ConsumerWidget {
           textColor: Colors.black,
           indicatorColor: Colors.indigo,
         ),
-        error: (e, stack) {
-          debugPrint(e.toString());
-          return Center(child: Text('エラーが発生しました: $e'));
-        },
+        error: (e, stack) => Center(
+          child: Text(
+            '予期せぬエラーが発生しました\nアプリを再起動させて下さい',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+        ),
         data: (rooms) {
           if (rooms == null || rooms.isEmpty) {
             //トークルームがない時の画像

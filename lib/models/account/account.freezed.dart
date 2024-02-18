@@ -225,3 +225,215 @@ abstract class _Account implements Account {
   _$$AccountImplCopyWith<_$AccountImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
+
+/// @nodoc
+mixin _$AccountState {
+  String get id => throw _privateConstructorUsedError;
+  String get name => throw _privateConstructorUsedError;
+  String get imagePath => throw _privateConstructorUsedError;
+  bool get isAccountCreatedSuccessfully => throw _privateConstructorUsedError;
+  bool get isEditing => throw _privateConstructorUsedError;
+
+  @JsonKey(ignore: true)
+  $AccountStateCopyWith<AccountState> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $AccountStateCopyWith<$Res> {
+  factory $AccountStateCopyWith(
+          AccountState value, $Res Function(AccountState) then) =
+      _$AccountStateCopyWithImpl<$Res, AccountState>;
+  @useResult
+  $Res call(
+      {String id,
+      String name,
+      String imagePath,
+      bool isAccountCreatedSuccessfully,
+      bool isEditing});
+}
+
+/// @nodoc
+class _$AccountStateCopyWithImpl<$Res, $Val extends AccountState>
+    implements $AccountStateCopyWith<$Res> {
+  _$AccountStateCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? name = null,
+    Object? imagePath = null,
+    Object? isAccountCreatedSuccessfully = null,
+    Object? isEditing = null,
+  }) {
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      imagePath: null == imagePath
+          ? _value.imagePath
+          : imagePath // ignore: cast_nullable_to_non_nullable
+              as String,
+      isAccountCreatedSuccessfully: null == isAccountCreatedSuccessfully
+          ? _value.isAccountCreatedSuccessfully
+          : isAccountCreatedSuccessfully // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isEditing: null == isEditing
+          ? _value.isEditing
+          : isEditing // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$AccountStateImplCopyWith<$Res>
+    implements $AccountStateCopyWith<$Res> {
+  factory _$$AccountStateImplCopyWith(
+          _$AccountStateImpl value, $Res Function(_$AccountStateImpl) then) =
+      __$$AccountStateImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String id,
+      String name,
+      String imagePath,
+      bool isAccountCreatedSuccessfully,
+      bool isEditing});
+}
+
+/// @nodoc
+class __$$AccountStateImplCopyWithImpl<$Res>
+    extends _$AccountStateCopyWithImpl<$Res, _$AccountStateImpl>
+    implements _$$AccountStateImplCopyWith<$Res> {
+  __$$AccountStateImplCopyWithImpl(
+      _$AccountStateImpl _value, $Res Function(_$AccountStateImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? name = null,
+    Object? imagePath = null,
+    Object? isAccountCreatedSuccessfully = null,
+    Object? isEditing = null,
+  }) {
+    return _then(_$AccountStateImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      imagePath: null == imagePath
+          ? _value.imagePath
+          : imagePath // ignore: cast_nullable_to_non_nullable
+              as String,
+      isAccountCreatedSuccessfully: null == isAccountCreatedSuccessfully
+          ? _value.isAccountCreatedSuccessfully
+          : isAccountCreatedSuccessfully // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isEditing: null == isEditing
+          ? _value.isEditing
+          : isEditing // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$AccountStateImpl implements _AccountState {
+  const _$AccountStateImpl(
+      {this.id = '',
+      this.name = '',
+      this.imagePath = '',
+      this.isAccountCreatedSuccessfully = false,
+      this.isEditing = false});
+
+  @override
+  @JsonKey()
+  final String id;
+  @override
+  @JsonKey()
+  final String name;
+  @override
+  @JsonKey()
+  final String imagePath;
+  @override
+  @JsonKey()
+  final bool isAccountCreatedSuccessfully;
+  @override
+  @JsonKey()
+  final bool isEditing;
+
+  @override
+  String toString() {
+    return 'AccountState(id: $id, name: $name, imagePath: $imagePath, isAccountCreatedSuccessfully: $isAccountCreatedSuccessfully, isEditing: $isEditing)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$AccountStateImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.imagePath, imagePath) ||
+                other.imagePath == imagePath) &&
+            (identical(other.isAccountCreatedSuccessfully,
+                    isAccountCreatedSuccessfully) ||
+                other.isAccountCreatedSuccessfully ==
+                    isAccountCreatedSuccessfully) &&
+            (identical(other.isEditing, isEditing) ||
+                other.isEditing == isEditing));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, id, name, imagePath,
+      isAccountCreatedSuccessfully, isEditing);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$AccountStateImplCopyWith<_$AccountStateImpl> get copyWith =>
+      __$$AccountStateImplCopyWithImpl<_$AccountStateImpl>(this, _$identity);
+}
+
+abstract class _AccountState implements AccountState {
+  const factory _AccountState(
+      {final String id,
+      final String name,
+      final String imagePath,
+      final bool isAccountCreatedSuccessfully,
+      final bool isEditing}) = _$AccountStateImpl;
+
+  @override
+  String get id;
+  @override
+  String get name;
+  @override
+  String get imagePath;
+  @override
+  bool get isAccountCreatedSuccessfully;
+  @override
+  bool get isEditing;
+  @override
+  @JsonKey(ignore: true)
+  _$$AccountStateImplCopyWith<_$AccountStateImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}

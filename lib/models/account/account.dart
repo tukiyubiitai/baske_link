@@ -12,3 +12,14 @@ class Account with _$Account {
     @Default([]) List<String> blockList,
   }) = _Account;
 }
+
+@freezed
+class AccountState with _$AccountState {
+  const factory AccountState({
+    @Default('') String id,
+    @Default('') String name,
+    @Default('') String imagePath,
+    @Default(false) bool isAccountCreatedSuccessfully,
+    @Default(false) bool isEditing,
+  }) = _AccountState;
+}

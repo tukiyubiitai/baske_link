@@ -1,10 +1,11 @@
 import 'package:basketball_app/widgets/report/report_dialog_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../models/report_reason.dart';
 import '../../../utils/email_sender.dart';
 import '../../models/account/account.dart';
-import '../../state/providers/account/account_state_notifier.dart';
+import '../../state/providers/account/account_notifier.dart';
 
 class PostReportDialog extends ConsumerStatefulWidget {
   final Account reportedUser; //報告されたユーザー（投稿者）

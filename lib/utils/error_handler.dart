@@ -100,3 +100,26 @@ class ErrorHandler {
     ref.read(errorMessageProvider.notifier).state = message;
   }
 }
+
+class HttpStatusErrorMessage {
+  static String getMessage(int statusCode) {
+    switch (statusCode) {
+      case 400:
+        return '不正なリクエストです。入力内容を確認してください。';
+      case 401:
+        return '認証に失敗しました。ログイン情報を確認してください。';
+      case 403:
+        return 'アクセス権限がありません。';
+      case 404:
+        return 'リソースが見つかりませんでした。';
+      case 408:
+        return 'リクエストがタイムアウトしました。ネットワーク状況を確認してください。';
+      case 500:
+        return 'サーバー内部エラーが発生しました。管理者に連絡してください。';
+      case 503:
+        return 'サービス利用不可。サーバーがダウンしている可能性があります。';
+      default:
+        return '予期せぬエラーが発生しました。エラーコード: $statusCode';
+    }
+  }
+}

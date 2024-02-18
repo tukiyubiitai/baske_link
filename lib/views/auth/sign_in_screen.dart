@@ -5,7 +5,7 @@ import 'package:flutter_signin_button/button_view.dart';
 
 import '../../../utils/error_handler.dart';
 import '../../view_models/auth_view_model.dart';
-import '../../widgets/bottom_navigation.dart';
+import '../../bottom_navigation.dart';
 import '../../widgets/progress_indicator.dart';
 import '../account/create_account_page.dart';
 

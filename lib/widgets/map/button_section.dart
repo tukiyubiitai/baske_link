@@ -1,9 +1,8 @@
+import 'package:basketball_app/state/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../state/providers/map/map_provider.dart';
-import '../../view_models/map_view_model.dart';
 
 // class ButtonSection extends ConsumerStatefulWidget {
 //   @override
@@ -132,8 +131,7 @@ class ButtonSection extends ConsumerWidget {
   Widget _searchButton(BuildContext context, WidgetRef ref) {
     return ElevatedButton(
       onPressed: () async {
-        LatLng center = await MapViewModel().getMiddlePoint(context, ref);
-        await MapViewModel().setMarkers(center.latitude, center.longitude, ref);
+        await ref.read(mapViewModelProvider).setMarkers(ref);
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.indigo[900],
@@ -151,19 +149,13 @@ class ButtonSection extends ConsumerWidget {
 
 //現在位置にカメラ移動
   Widget _moveCurrentPosition(WidgetRef ref) {
-    final mapStateNotifier = ref.read(mapProvider);
+    ref.read(mapProvider);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ElevatedButton(
         onPressed: () {
-          if (mapStateNotifier.currentPosition != null) {
-            mapStateNotifier.mapController!.animateCamera(
-              CameraUpdate.newLatLng(
-                LatLng(mapStateNotifier.currentPosition!.latitude,
-                    mapStateNotifier.currentPosition!.longitude),
-              ),
-            );
-          }
+          // 現在位置にカメラを移動
+          ref.read(mapViewModelProvider).moveToCurrentPosition(ref);
         },
         style: ElevatedButton.styleFrom(
           shape: const CircleBorder(), // 円形のボタンにする

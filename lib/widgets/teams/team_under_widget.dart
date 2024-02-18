@@ -8,7 +8,7 @@ import '../../models/account/account.dart';
 import '../../models/posts/team_model.dart';
 import '../../state/providers/account/account_notifier.dart';
 import '../../view_models/talk_room_view_model.dart';
-import '../bottom_navigation.dart';
+import '../../bottom_navigation.dart';
 
 /*
 チーム目標

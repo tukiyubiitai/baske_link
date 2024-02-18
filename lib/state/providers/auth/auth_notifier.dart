@@ -1,11 +1,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../infrastructure/firebase/account_firebase.dart';
-import '../../../../infrastructure/firebase/authentication_service.dart';
+import '../../../infrastructure/firebase/account_firebase.dart';
+import '../../../infrastructure/firebase/authentication_service.dart';
 import '../../../models/auth/auth_status.dart';
 import '../../../view_models/auth_view_model.dart';
 import '../account/account_notifier.dart';
-import '../account/account_state_notifier.dart';
 
 part 'auth_notifier.g.dart';
 
@@ -23,7 +22,6 @@ class AuthStateNotifier extends _$AuthStateNotifier {
         //トークン更新
         AuthenticationService().updateUserToken(user);
         ref.read(accountNotifierProvider.notifier).updateAccount(userAccount);
-        ref.read(accountStateNotifierProvider.notifier).updateAll(userAccount);
         return AuthStatus.authenticated; // 認証され、Firestoreにデータがある
       } else {
         return AuthStatus.accountNotCreated; // アカウントはあるが、Firestoreにデータがない

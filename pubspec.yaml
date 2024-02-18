@@ -52,7 +52,6 @@ dependencies:
   riverpod_annotation:
   freezed_annotation:
   expand_widget: ^3.1.1
-  shared_preferences: ^2.2.2
   logger: ^2.0.2+1
 
 
@@ -89,4 +88,3 @@ flutter:
 
   assets:
     - assets/images/
-

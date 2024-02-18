@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../views/account/my_user_page.dart';
-import '../views/chat/talk_room.dart';
-import '../views/home/timeline_page.dart';
-import '../views/map/map_screen.dart';
+import 'views/account/my_user_page.dart';
+import 'views/chat/talk_room.dart';
+import 'views/home/timeline_page.dart';
+import 'views/map/map_screen.dart';
 
 class BottomTabNavigator extends StatefulWidget {
   final int initialIndex; // initialIndexパラメータを追加

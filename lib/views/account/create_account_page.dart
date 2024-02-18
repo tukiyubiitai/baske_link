@@ -1,20 +1,21 @@
 import 'dart:io';
 
 import 'package:basketball_app/models/app_colors.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../infrastructure/image_processing/image_processing_utils.dart';
-import '../../../models/account/account_state.dart';
 import '../../../utils/error_handler.dart';
 import '../../../utils/loading_manager.dart';
+import '../../bottom_navigation.dart';
 import '../../dialogs/snackbar_utils.dart';
-import '../../state/providers/account/account_state_notifier.dart';
+import '../../models/account/account.dart';
+import '../../state/providers/account/account_notifier.dart';
 import '../../state/providers/global_loader.dart';
 import '../../state/providers/providers.dart';
 import '../../widgets/account/custom_text_fields.dart';
 import '../../widgets/account/user_profile_circle.dart';
-import '../../widgets/bottom_navigation.dart';
 import '../../widgets/progress_indicator.dart';
 
 ///新規アカウント作成ページUI
@@ -124,9 +125,26 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
           _buildNameTextField(),
           //保存ボタン
           _buildSaveButton(context),
+          IconButton(
+              onPressed: () async {
+                await deleteUser();
+              },
+              icon: Icon(Icons.delete)),
         ],
       ),
     );
+  }
+
+  Future<void> deleteUser() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        await user.delete();
+        print("ユーザー情報が削除されました。");
+      } on FirebaseAuthException catch (e) {
+        print("ユーザー情報の削除中にエラーが発生しました: ${e.message}");
+      }
+    }
   }
 
   Widget _buildProfileAvatar(BuildContext context) {
@@ -186,7 +204,7 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
         (route) => false,
       );
       showSnackBar(
-        context: ref.context,
+        context: context,
         text: "ユーザーが作成されました！",
         backgroundColor: Colors.white,
         textColor: Colors.black,

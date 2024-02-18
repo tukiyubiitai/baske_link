@@ -90,6 +90,11 @@ class MapProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearAddress() {
+    _addressList.clear();
+    notifyListeners();
+  }
+
   void clearUrls() {
     _urls.clear();
     notifyListeners();

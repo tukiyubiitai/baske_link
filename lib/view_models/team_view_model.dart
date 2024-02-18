@@ -11,7 +11,6 @@ import '../../models/posts/team_model.dart';
 import '../../utils/error_handler.dart';
 import '../dialogs/snackbar_utils.dart';
 import '../state/providers/account/account_notifier.dart';
-import '../state/providers/account/account_state_notifier.dart';
 import '../state/providers/global_loader.dart';
 import '../state/providers/post/age_notifier.dart';
 import '../state/providers/post/tag_area_notifier.dart';
