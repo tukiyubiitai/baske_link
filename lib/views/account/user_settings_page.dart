@@ -209,9 +209,14 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
                   leading: const Icon(Icons.image),
                   onTap: () async {
                     Navigator.of(context).pop();
-                    await ref
+                    File? selectedImage = await ref
                         .read(accountManagerProvider.notifier)
                         .processImageAction(false);
+                    if (selectedImage != null) {
+                      setState(() {
+                        image = selectedImage;
+                      });
+                    }
                   }),
               const SizedBox(
                 height: 30,
@@ -251,33 +256,4 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
       return;
     }
   }
-
-// 画像の削除または追加を行う処理
-// Future<void> processImageAction(BuildContext context, bool isDeleting) async {
-//   try {
-//     var accountState = ref.read(accountManagerProvider);
-//
-//     LoadingManager.instance.startLoading(ref);
-//     if (isDeleting) {
-//       // 画像削除の処理
-//       await ImageManager.deleteImage(
-//           ref.read(accountManagerProvider).imagePath.toString());
-//       image = null;
-//       // myAccount.imagePath = "";
-//       ref.read(accountManagerProvider.notifier).onUserImageChange("");
-//       isImageDeleted = true;
-//     } else {
-//       // 画像追加の処理
-//       var result = await cropImage();
-//       if (result != null) {
-//         image = File(result.path);
-//         ref
-//             .read(accountManagerProvider.notifier)
-//             .onUserImageChange(image!.path);
-//       }
-//     }
-//   } finally {
-//     LoadingManager.instance.stopLoading(ref);
-//   }
-// }
 }

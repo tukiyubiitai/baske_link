@@ -114,15 +114,24 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
     );
   }
 
+  //プロフィール画像
   Widget _buildProfileAvatar(BuildContext context) {
     return ProfileAvatar(
       localImage: image,
-      onTap: () async => await ref
-          .read(accountManagerProvider.notifier)
-          .onSelectProfileImage(),
+      onTap: () async {
+        File? selectedImage = await ref
+            .read(accountManagerProvider.notifier)
+            .onSelectProfileImage();
+        if (selectedImage != null) {
+          setState(() {
+            image = selectedImage;
+          });
+        }
+      },
     );
   }
 
+  //ユーザー名
   Widget _buildNameTextField() {
     return SizedBox(
       width: 300,
@@ -141,6 +150,7 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
     );
   }
 
+  // 保存ボタン
   Widget _buildSaveButton(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
