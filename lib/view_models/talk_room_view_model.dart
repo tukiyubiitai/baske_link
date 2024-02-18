@@ -1,11 +1,10 @@
 import 'package:basketball_app/infrastructure/firebase/room_firebase.dart';
-import 'package:basketball_app/utils/error_handler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/account/account.dart';
-import '../dialogs/snackbar_utils.dart';
+import '../dialogs/snackbar.dart';
 import '../state/providers/chat/talk_room_provider.dart';
 
 class TalkRoomViewModel extends ChangeNotifier {
@@ -60,7 +59,7 @@ class TalkRoomViewModel extends ChangeNotifier {
             textColor: Colors.black);
       }
     } catch (e) {
-      return handleError(e, ref.context);
+      // return handleError(e, ref.context);
     }
   }
 }

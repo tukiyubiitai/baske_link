@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../state/providers/providers.dart';
-import '../../utils/error_handler.dart';
 import '../../widgets/map/build_map_section.dart';
 import '../../widgets/map/button_section.dart';
 import '../../widgets/map/list_section.dart';
@@ -27,11 +26,6 @@ class MapPageState extends ConsumerState<MapPage> {
   Widget build(BuildContext context) {
     ref.watch(mapViewModelProvider);
     final errorMessage = ref.watch(errorMessageProvider); //エラーを監視
-
-    //エラーメッセージが更新された際にユーザーに通知
-    if (errorMessage != null) {
-      ErrorHandler.instance.showAndResetError(errorMessage, context, ref);
-    }
 
     return Scaffold(
       extendBodyBehindAppBar: true,

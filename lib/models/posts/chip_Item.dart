@@ -1,6 +1,6 @@
 //年齢
 
-import '../utils/filter_functions.dart';
+import '../../utils/filter_functions.dart';
 
 final List<FilterChipItemWidget> ageChipItems = <FilterChipItemWidget>[
   FilterChipItemWidget('10代'),

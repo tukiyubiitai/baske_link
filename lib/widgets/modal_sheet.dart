@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../dialogs/snackbar_utils.dart';
+import '../dialogs/snackbar.dart';
 import '../state/providers/games/game_post_notifier.dart';
 import '../state/providers/team/team_post_notifier.dart';
 import '../views/games/game_search_results_page.dart';

@@ -233,6 +233,8 @@ mixin _$AccountState {
   String get imagePath => throw _privateConstructorUsedError;
   bool get isAccountCreatedSuccessfully => throw _privateConstructorUsedError;
   bool get isEditing => throw _privateConstructorUsedError;
+  bool get isLoading => throw _privateConstructorUsedError;
+  bool get updateIsEditing => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $AccountStateCopyWith<AccountState> get copyWith =>
@@ -250,7 +252,9 @@ abstract class $AccountStateCopyWith<$Res> {
       String name,
       String imagePath,
       bool isAccountCreatedSuccessfully,
-      bool isEditing});
+      bool isEditing,
+      bool isLoading,
+      bool updateIsEditing});
 }
 
 /// @nodoc
@@ -271,6 +275,8 @@ class _$AccountStateCopyWithImpl<$Res, $Val extends AccountState>
     Object? imagePath = null,
     Object? isAccountCreatedSuccessfully = null,
     Object? isEditing = null,
+    Object? isLoading = null,
+    Object? updateIsEditing = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -293,6 +299,14 @@ class _$AccountStateCopyWithImpl<$Res, $Val extends AccountState>
           ? _value.isEditing
           : isEditing // ignore: cast_nullable_to_non_nullable
               as bool,
+      isLoading: null == isLoading
+          ? _value.isLoading
+          : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
+      updateIsEditing: null == updateIsEditing
+          ? _value.updateIsEditing
+          : updateIsEditing // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -310,7 +324,9 @@ abstract class _$$AccountStateImplCopyWith<$Res>
       String name,
       String imagePath,
       bool isAccountCreatedSuccessfully,
-      bool isEditing});
+      bool isEditing,
+      bool isLoading,
+      bool updateIsEditing});
 }
 
 /// @nodoc
@@ -329,6 +345,8 @@ class __$$AccountStateImplCopyWithImpl<$Res>
     Object? imagePath = null,
     Object? isAccountCreatedSuccessfully = null,
     Object? isEditing = null,
+    Object? isLoading = null,
+    Object? updateIsEditing = null,
   }) {
     return _then(_$AccountStateImpl(
       id: null == id
@@ -351,6 +369,14 @@ class __$$AccountStateImplCopyWithImpl<$Res>
           ? _value.isEditing
           : isEditing // ignore: cast_nullable_to_non_nullable
               as bool,
+      isLoading: null == isLoading
+          ? _value.isLoading
+          : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
+      updateIsEditing: null == updateIsEditing
+          ? _value.updateIsEditing
+          : updateIsEditing // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -363,7 +389,9 @@ class _$AccountStateImpl implements _AccountState {
       this.name = '',
       this.imagePath = '',
       this.isAccountCreatedSuccessfully = false,
-      this.isEditing = false});
+      this.isEditing = false,
+      this.isLoading = false,
+      this.updateIsEditing = false});
 
   @override
   @JsonKey()
@@ -380,10 +408,16 @@ class _$AccountStateImpl implements _AccountState {
   @override
   @JsonKey()
   final bool isEditing;
+  @override
+  @JsonKey()
+  final bool isLoading;
+  @override
+  @JsonKey()
+  final bool updateIsEditing;
 
   @override
   String toString() {
-    return 'AccountState(id: $id, name: $name, imagePath: $imagePath, isAccountCreatedSuccessfully: $isAccountCreatedSuccessfully, isEditing: $isEditing)';
+    return 'AccountState(id: $id, name: $name, imagePath: $imagePath, isAccountCreatedSuccessfully: $isAccountCreatedSuccessfully, isEditing: $isEditing, isLoading: $isLoading, updateIsEditing: $updateIsEditing)';
   }
 
   @override
@@ -400,12 +434,16 @@ class _$AccountStateImpl implements _AccountState {
                 other.isAccountCreatedSuccessfully ==
                     isAccountCreatedSuccessfully) &&
             (identical(other.isEditing, isEditing) ||
-                other.isEditing == isEditing));
+                other.isEditing == isEditing) &&
+            (identical(other.isLoading, isLoading) ||
+                other.isLoading == isLoading) &&
+            (identical(other.updateIsEditing, updateIsEditing) ||
+                other.updateIsEditing == updateIsEditing));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, id, name, imagePath,
-      isAccountCreatedSuccessfully, isEditing);
+      isAccountCreatedSuccessfully, isEditing, isLoading, updateIsEditing);
 
   @JsonKey(ignore: true)
   @override
@@ -420,7 +458,9 @@ abstract class _AccountState implements AccountState {
       final String name,
       final String imagePath,
       final bool isAccountCreatedSuccessfully,
-      final bool isEditing}) = _$AccountStateImpl;
+      final bool isEditing,
+      final bool isLoading,
+      final bool updateIsEditing}) = _$AccountStateImpl;
 
   @override
   String get id;
@@ -432,6 +472,10 @@ abstract class _AccountState implements AccountState {
   bool get isAccountCreatedSuccessfully;
   @override
   bool get isEditing;
+  @override
+  bool get isLoading;
+  @override
+  bool get updateIsEditing;
   @override
   @JsonKey(ignore: true)
   _$$AccountStateImplCopyWith<_$AccountStateImpl> get copyWith =>

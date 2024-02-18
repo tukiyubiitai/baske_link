@@ -32,7 +32,7 @@ class MapRepository {
       } else {
         // ステータスコードに応じたエラーメッセージをログに記録します。
         String errorMessage =
-            HttpStatusErrorMessage.getMessage(response.statusCode);
+            HttpStatusErrorMessage.getHttpMessage(response.statusCode);
         AppLogger.instance.error("APIエラー: $errorMessage");
       }
     } catch (e) {
@@ -52,7 +52,7 @@ class MapRepository {
       } else {
         // ステータスコードに応じたエラーメッセージをログに記録します。
         String errorMessage =
-            HttpStatusErrorMessage.getMessage(response.statusCode);
+            HttpStatusErrorMessage.getHttpMessage(response.statusCode);
         AppLogger.instance.error("APIエラー: $errorMessage");
       }
     } catch (e) {

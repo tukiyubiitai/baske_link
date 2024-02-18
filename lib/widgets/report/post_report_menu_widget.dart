@@ -1,7 +1,7 @@
 import 'package:basketball_app/widgets/report/post_report_dialog.dart';
 import 'package:flutter/material.dart';
 
-import '../../../models/choice_model.dart';
+import '../../../models/user_choice.dart';
 import '../../models/account/account.dart';
 
 class PostReportMenu extends StatelessWidget {

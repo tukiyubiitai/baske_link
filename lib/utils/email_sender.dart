@@ -1,7 +1,7 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 
-import '../dialogs/snackbar_utils.dart';
+import '../dialogs/snackbar.dart';
 
 class EmailSender {
   // 非同期のメール送信メソッド

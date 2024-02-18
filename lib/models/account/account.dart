@@ -21,5 +21,7 @@ class AccountState with _$AccountState {
     @Default('') String imagePath,
     @Default(false) bool isAccountCreatedSuccessfully,
     @Default(false) bool isEditing,
+    @Default(false) bool isLoading,
+    @Default(false) bool updateIsEditing,
   }) = _AccountState;
 }

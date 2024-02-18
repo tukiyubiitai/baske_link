@@ -1,5 +1,5 @@
-import 'package:basketball_app/models/app_colors.dart';
 import 'package:basketball_app/models/auth/auth_status.dart';
+import 'package:basketball_app/models/color/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

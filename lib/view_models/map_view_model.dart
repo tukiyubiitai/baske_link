@@ -69,7 +69,6 @@ class MapViewModel extends ChangeNotifier {
       }
     } catch (e) {
       AppLogger.instance.error("現在地の取得に失敗 $e");
-      ErrorHandler.instance.setErrorState(ref, getErrorMessage(e));
     }
   }
 
@@ -166,7 +165,6 @@ class MapViewModel extends ChangeNotifier {
       }));
     } catch (e) {
       AppLogger.instance.error("バスケットコート情報の取得中にエラーが発生しました $e");
-      ErrorHandler.instance.setErrorState(ref, getErrorMessage(e));
     } finally {
       mapStateNotifier.setLoading(false); // ロード完了
     }

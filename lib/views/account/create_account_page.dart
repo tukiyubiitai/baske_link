@@ -1,18 +1,14 @@
 import 'dart:io';
 
-import 'package:basketball_app/models/app_colors.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:basketball_app/models/color/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../infrastructure/image_processing/image_processing_utils.dart';
-import '../../../utils/error_handler.dart';
 import '../../../utils/loading_manager.dart';
 import '../../bottom_navigation.dart';
-import '../../dialogs/snackbar_utils.dart';
+import '../../dialogs/snackbar.dart';
 import '../../models/account/account.dart';
-import '../../state/providers/account/account_notifier.dart';
-import '../../state/providers/global_loader.dart';
 import '../../state/providers/providers.dart';
 import '../../widgets/account/custom_text_fields.dart';
 import '../../widgets/account/user_profile_circle.dart';
@@ -38,54 +34,42 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
 
   @override
   Widget build(BuildContext context) {
+    final accountState = ref.watch(accountManagerProvider);
     final bottomSpace = MediaQuery.of(context).viewInsets.bottom;
-    ref.watch(accountStateNotifierProvider); // アカウントの状態を監視
-    final loader = ref.watch(globalLoaderProvider); // ローディング状態を監視
-    final errorMessage = ref.watch(errorMessageProvider); //エラーを監視
-
-    //エラーメッセージが更新された際にユーザーに通知
-    if (errorMessage != null) {
-      ErrorHandler.instance.showAndResetError(errorMessage, context, ref);
-    }
 
     // アカウント作成成功後の画面遷移
-    ref.listen<AccountState>(accountStateNotifierProvider, (_, state) {
+    ref.listen<AccountState>(accountManagerProvider, (_, state) {
       _handleAccountCreation(state);
     });
 
     // ローディング中でない場合、UIを表示
-    return loader == false
-        ? Scaffold(
-            resizeToAvoidBottomInset: false,
-            backgroundColor: AppColors.baseColor,
-            appBar: AppBar(
-              elevation: 0,
-              backgroundColor: AppColors.baseColor,
-              title: const Text(
-                "新規アカウント作成",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            body: Stack(
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor: AppColors.baseColor,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: AppColors.baseColor,
+        title: const Text("新規アカウント作成", style: TextStyle(color: Colors.white)),
+      ),
+      body: accountState.isLoading
+          ? ScaffoldShowProgressIndicator(
+              textColor: AppColors.secondary,
+              indicatorColor: AppColors.secondary,
+            )
+          : Stack(
               children: [
-                // 背景コンテナ
                 _buildBackgroundContainer(),
                 SingleChildScrollView(
                   reverse: true,
                   child: Padding(
                     padding: EdgeInsets.only(bottom: bottomSpace),
-                    // 主要コンテンツ
                     child: _buildContent(context),
                   ),
                 ),
               ],
             ),
-          )
-        : ScaffoldShowProgressIndicator(
-            textColor: AppColors.secondary,
-            indicatorColor: AppColors.secondary,
-          );
-    // ローディング中はインジケータを表示
+    );
+    //
   }
 
   // 背景コンテナ
@@ -125,26 +109,9 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
           _buildNameTextField(),
           //保存ボタン
           _buildSaveButton(context),
-          IconButton(
-              onPressed: () async {
-                await deleteUser();
-              },
-              icon: Icon(Icons.delete)),
         ],
       ),
     );
-  }
-
-  Future<void> deleteUser() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        await user.delete();
-        print("ユーザー情報が削除されました。");
-      } on FirebaseAuthException catch (e) {
-        print("ユーザー情報の削除中にエラーが発生しました: ${e.message}");
-      }
-    }
   }
 
   Widget _buildProfileAvatar(BuildContext context) {
@@ -159,9 +126,6 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
       width: 300,
       child: CustomTextFiled(
         controller: _nameController,
-        func: (value) => ref
-            .read(accountStateNotifierProvider.notifier)
-            .onUserNameChange(value),
       ),
     );
   }
@@ -171,9 +135,10 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
       padding: const EdgeInsets.all(8.0),
       child: ElevatedButton(
         onPressed: () async {
-          await ref
-              .read(accountViewModelProvider.notifier)
-              .createUserAccount(ref);
+          ref
+              .read(accountManagerProvider.notifier)
+              .onUserNameChange(_nameController.text);
+          await ref.read(accountManagerProvider.notifier).createAccount(ref);
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.baseColor,
@@ -222,7 +187,7 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
         image = File(result.path);
         //画像をaccountStateに保存
         ref
-            .read(accountStateNotifierProvider.notifier)
+            .read(accountManagerProvider.notifier)
             .onUserImageChange(image!.path);
       }
     } finally {

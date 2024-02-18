@@ -58,7 +58,7 @@ class AccountFirestore {
       return userData;
     } catch (e) {
       Logger().e("アカウント取得に失敗: ${getErrorMessage(e)}");
-      throw DataLayerException(getErrorMessage(e));
+      throw getErrorMessage(e);
     }
   }
 
@@ -104,7 +104,7 @@ class AccountFirestore {
       return updateAccount;
     } catch (e) {
       Logger().e("ユーザー更新失敗: ${getErrorMessage(e)}");
-      throw DataLayerException(getErrorMessage(e));
+      throw getErrorMessage(e);
     }
   }
 
@@ -124,7 +124,7 @@ class AccountFirestore {
       }
     } catch (e) {
       Logger().e("ユーザー情報取得に失敗: ${getErrorMessage(e)}");
-      throw DataLayerException(getErrorMessage(e));
+      throw getErrorMessage(e);
     }
     return null;
   }
@@ -173,7 +173,7 @@ class AccountFirestore {
       return false;
     } catch (e) {
       Logger().e("ブロックリスト追加エラー: ${getErrorMessage(e)}");
-      throw DataLayerException(getErrorMessage(e));
+      throw getErrorMessage(e);
     }
   }
 
@@ -213,7 +213,7 @@ class AccountFirestore {
       return true;
     } catch (e) {
       Logger().e("ユーザー登録失敗: ${getErrorMessage(e)}");
-      throw DataLayerException(getErrorMessage(e));
+      throw getErrorMessage(e);
     }
   }
 
@@ -230,7 +230,7 @@ class AccountFirestore {
       return true;
     } catch (e) {
       Logger().e("ユーザー更新失敗: $e,");
-      throw DataLayerException(getErrorMessage(e));
+      throw getErrorMessage(e);
     }
   }
 
@@ -286,7 +286,7 @@ class AccountFirestore {
       return true;
     } catch (e) {
       Logger().e("ユーザー削除失敗: $e,");
-      throw DataLayerException(getErrorMessage(e));
+      throw getErrorMessage(e);
     }
   }
 

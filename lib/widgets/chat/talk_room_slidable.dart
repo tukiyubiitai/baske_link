@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-import '../../dialogs/dialogs.dart';
-import '../../dialogs/snackbar_utils.dart';
+import '../../dialogs/custom_dialogs.dart';
+import '../../dialogs/snackbar.dart';
 import '../../state/providers/chat/talk_room_provider.dart';
 import '../../view_models/talk_room_view_model.dart';
 

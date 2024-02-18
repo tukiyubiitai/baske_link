@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../dialogs/dialogs.dart';
+import '../../dialogs/custom_dialogs.dart';
 import '../../models/account/account.dart';
 import '../../state/providers/account/account_notifier.dart';
 import '../../state/providers/chat/talk_room_provider.dart';

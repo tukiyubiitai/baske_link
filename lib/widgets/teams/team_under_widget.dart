@@ -1,14 +1,13 @@
-import 'package:basketball_app/utils/error_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../infrastructure/firebase/account_firebase.dart';
-import '../../dialogs/dialogs.dart';
+import '../../bottom_navigation.dart';
+import '../../dialogs/custom_dialogs.dart';
 import '../../models/account/account.dart';
 import '../../models/posts/team_model.dart';
 import '../../state/providers/account/account_notifier.dart';
 import '../../view_models/talk_room_view_model.dart';
-import '../../bottom_navigation.dart';
 
 /*
 チーム目標
@@ -367,8 +366,6 @@ class _BuildUnderState extends ConsumerState<BuildUnder> {
         ),
         (Route<dynamic> route) => false,
       );
-    } catch (e) {
-      handleError(e, context);
-    }
+    } catch (e) {}
   }
 }

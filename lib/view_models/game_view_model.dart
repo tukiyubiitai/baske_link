@@ -9,7 +9,7 @@ import '../../infrastructure/firebase/account_firebase.dart';
 import '../../models/account/account.dart';
 import '../../models/posts/game_model.dart';
 import '../../utils/error_handler.dart';
-import '../dialogs/snackbar_utils.dart';
+import '../dialogs/snackbar.dart';
 import '../state/providers/account/account_notifier.dart';
 import '../state/providers/games/game_post_notifier.dart';
 import '../state/providers/games/game_post_provider.dart';
@@ -84,7 +84,6 @@ class GamePostViewModel extends ChangeNotifier {
       return false;
     } catch (e) {
       AppLogger.instance.error("投稿失敗 $e");
-      ErrorHandler.instance.setErrorState(ref, getErrorMessage(e));
     } finally {
       //終了
       LoadingManager.instance.stopLoading(ref);
@@ -150,7 +149,6 @@ class GamePostViewModel extends ChangeNotifier {
       return false;
     } catch (e) {
       AppLogger.instance.error("投稿更新失敗 $e");
-      ErrorHandler.instance.setErrorState(ref, getErrorMessage(e));
     } finally {
       //終了
       LoadingManager.instance.stopLoading(ref);
@@ -189,7 +187,6 @@ class GamePostViewModel extends ChangeNotifier {
       }
     } catch (e) {
       AppLogger.instance.error("投稿削除 $e");
-      ErrorHandler.instance.setErrorState(ref, getErrorMessage(e));
     } finally {
       LoadingManager.instance.stopLoading(ref);
     }

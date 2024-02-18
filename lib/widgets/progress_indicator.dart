@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../models/app_colors.dart';
+import '../models/color/app_colors.dart';
 
 class ShowProgressIndicator extends StatelessWidget {
   final Color? textColor;

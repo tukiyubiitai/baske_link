@@ -1,14 +1,14 @@
 import 'dart:io';
 
-import 'package:basketball_app/models/chip_Item.dart';
-import 'package:basketball_app/utils/error_handler.dart';
+import 'package:basketball_app/models/posts/chip_Item.dart';
 import 'package:basketball_app/utils/filter_functions.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../infrastructure/image_processing/image_processing_utils.dart';
-import '../../dialogs/snackbar_utils.dart';
+import '../../bottom_navigation.dart';
+import '../../dialogs/snackbar.dart';
 import '../../models/posts/team_model.dart';
 import '../../state/providers/global_loader.dart';
 import '../../state/providers/post/age_notifier.dart';
@@ -17,7 +17,6 @@ import '../../state/providers/post/target_notifier.dart';
 import '../../state/providers/team/team_post_notifier.dart';
 import '../../view_models/team_view_model.dart';
 import '../../widgets/area_dropdown_menu_widget.dart';
-import '../../bottom_navigation.dart';
 import '../../widgets/common_widgets/back_button_widget.dart';
 import '../../widgets/post/image_widget.dart';
 import '../../widgets/posts_custom_text_fields.dart';
@@ -78,9 +77,7 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
           imageUrl = post.imageUrl;
         }
       }
-    } catch (e) {
-      handleError(e, context);
-    }
+    } catch (e) {}
   }
 
   @override
@@ -482,9 +479,7 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
           (route) => false, // すべてのページを破棄するため、falseを返す
         );
       }
-    } catch (e) {
-      handleError(e, context);
-    }
+    } catch (e) {}
   }
 
   //更新
@@ -509,8 +504,6 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
           (route) => false, // すべてのページを破棄するため、falseを返す
         );
       }
-    } catch (e) {
-      handleError(e, context);
-    }
+    } catch (e) {}
   }
 }

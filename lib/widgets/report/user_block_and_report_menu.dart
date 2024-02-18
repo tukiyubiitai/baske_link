@@ -1,16 +1,15 @@
-import 'package:basketball_app/utils/error_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../models/choice_model.dart';
-import '../../dialogs/dialogs.dart';
-import '../../dialogs/snackbar_utils.dart';
+import '../../../models/user_choice.dart';
+import '../../bottom_navigation.dart';
+import '../../dialogs/custom_dialogs.dart';
+import '../../dialogs/snackbar.dart';
 import '../../dialogs/user_report_dialog.dart';
 import '../../infrastructure/firebase/account_firebase.dart';
 import '../../models/account/account.dart';
 import '../../state/providers/account/account_notifier.dart';
 import '../../view_models/talk_room_view_model.dart';
-import '../../bottom_navigation.dart';
 
 class UserBlockAndReport extends ConsumerWidget {
   final Account talkUser;
@@ -125,8 +124,6 @@ class UserBlockAndReport extends ConsumerWidget {
           textColor: Colors.white,
         );
       }
-    } catch (e) {
-      handleError(e, ref.context);
-    }
+    } catch (e) {}
   }
 }

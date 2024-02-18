@@ -1,3 +1,4 @@
+import 'package:basketball_app/state/providers/providers.dart';
 import 'package:basketball_app/views/account/user_settings_page.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +56,7 @@ class _MyPageState extends ConsumerState<MyUserPage>
   void navigateToUserSettingsPage() {
     final myAccount = ref.read(accountNotifierProvider);
 
-    ref.read(accountStateNotifierProvider.notifier).updateAll(myAccount);
+    ref.read(accountManagerProvider.notifier).updateAll(myAccount);
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => UserSettingPage()),
@@ -66,7 +67,7 @@ class _MyPageState extends ConsumerState<MyUserPage>
   Widget build(BuildContext context) {
     final myAccount = ref.read(accountNotifierProvider);
     double screenHeight = MediaQuery.of(context).size.height; // 画面の高さを取得
-    ref.watch(accountStateNotifierProvider);
+    ref.watch(accountManagerProvider);
 
     // チーム投稿とゲーム投稿の状態を監視
     ref.watch(myTeamPostNotifierProvider(myAccount));

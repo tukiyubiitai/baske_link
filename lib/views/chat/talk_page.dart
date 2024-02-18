@@ -1,4 +1,3 @@
-import 'package:basketball_app/utils/error_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -171,7 +170,6 @@ class _TalkPageState extends ConsumerState<TalkPage> {
     } catch (e) {
       // エラーハンドリングをここに追加
       print('メッセージの送信に失敗しました: $e');
-      handleError(e, context);
     }
   }
 }

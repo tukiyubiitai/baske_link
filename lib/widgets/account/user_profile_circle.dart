@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../utils/image_provider_utils.dart';
-import '../../state/providers/account/account_notifier.dart';
+import '../../state/providers/providers.dart';
 
 class AccountCircleWidget extends StatelessWidget {
   final String imagePath;
@@ -130,7 +130,7 @@ class ProfileAvatar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(accountStateNotifierProvider);
+    ref.watch(accountManagerProvider);
     final imageProvider =
         ImageProviderUtils.getUserImage(localImage, networkImagePath);
     final shouldShowDefault = localImage == null &&

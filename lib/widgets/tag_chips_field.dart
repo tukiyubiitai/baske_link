@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../dialogs/snackbar_utils.dart';
+import '../dialogs/snackbar.dart';
 import '../state/providers/post/tag_area_notifier.dart';
 
 class TagChipsField extends ConsumerStatefulWidget {

@@ -1,15 +1,14 @@
 import 'dart:io';
 
-import 'package:basketball_app/utils/error_handler.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../infrastructure/image_processing/image_processing_utils.dart';
-import '../../../models/chip_Item.dart';
 import '../../../utils/filter_functions.dart';
-import '../../dialogs/snackbar_utils.dart';
+import '../../dialogs/snackbar.dart';
+import '../../models/posts/chip_Item.dart';
 import '../../models/posts/game_model.dart';
 import '../../state/providers/games/game_post_notifier.dart';
 import '../../state/providers/global_loader.dart';
@@ -72,9 +71,7 @@ class _NewGamePostPageState extends ConsumerState<GamePostPage> {
           imageUrl = post.imageUrl;
         }
       }
-    } catch (e) {
-      handleError(e, context);
-    }
+    } catch (e) {}
   }
 
   //テキストフィールドの設定
@@ -348,7 +345,6 @@ class _NewGamePostPageState extends ConsumerState<GamePostPage> {
       }
     } catch (e) {
       // エラー処理
-      handleError(e, context);
     } finally {
       // ローダーを非表示
       ref.read(globalLoaderProvider.notifier).setLoaderValue(false);
@@ -368,9 +364,7 @@ class _NewGamePostPageState extends ConsumerState<GamePostPage> {
         );
         Navigator.popUntil(ref.context, (route) => route.isFirst);
       }
-    } catch (e) {
-      handleError(e, context);
-    }
+    } catch (e) {}
   }
 
   //更新
@@ -386,8 +380,6 @@ class _NewGamePostPageState extends ConsumerState<GamePostPage> {
         );
         Navigator.popUntil(ref.context, (route) => route.isFirst);
       }
-    } catch (e) {
-      handleError(e, context);
-    }
+    } catch (e) {}
   }
 }

@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/report_reason.dart';
 import '../../../utils/email_sender.dart';
 import '../../models/account/account.dart';
-import '../../state/providers/account/account_notifier.dart';
+import '../../state/providers/providers.dart';
 
 class PostReportDialog extends ConsumerStatefulWidget {
   final Account reportedUser; //報告されたユーザー（投稿者）
@@ -33,7 +33,7 @@ class _PostReportDialogState extends ConsumerState<PostReportDialog> {
   @override
   Widget build(BuildContext context) {
     final bottomSpace = MediaQuery.of(context).viewInsets.bottom;
-    final accountState = ref.read(accountStateNotifierProvider);
+    final accountState = ref.read(accountManagerProvider);
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomSpace),

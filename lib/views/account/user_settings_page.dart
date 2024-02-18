@@ -5,14 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../infrastructure/firebase/storage_firebase.dart';
 import '../../../infrastructure/image_processing/image_processing_utils.dart';
-import '../../../models/app_colors.dart';
-import '../../../utils/error_handler.dart';
 import '../../../utils/image_utils.dart';
 import '../../../utils/loading_manager.dart';
 import '../../bottom_navigation.dart';
-import '../../dialogs/snackbar_utils.dart';
-import '../../state/providers/account/account_notifier.dart';
-import '../../state/providers/global_loader.dart';
+import '../../dialogs/snackbar.dart';
+import '../../models/account/account.dart';
+import '../../models/color/app_colors.dart';
 import '../../state/providers/providers.dart';
 import '../../widgets/account/custom_text_fields.dart';
 import '../../widgets/account/user_profile_circle.dart';
@@ -35,7 +33,7 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
   @override
   void initState() {
     _nameController = TextEditingController(
-        text: ref.read(accountStateNotifierProvider).name); //初期値としてユーザー名を設定
+        text: ref.read(accountManagerProvider).name); //初期値としてユーザー名を設定
     super.initState();
   }
 
@@ -47,18 +45,16 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(accountStateNotifierProvider);
-    final loader = ref.watch(globalLoaderProvider); // ローディング状態を監視
+    final accountState = ref.watch(accountManagerProvider);
     final bottomSpace = MediaQuery.of(context).viewInsets.bottom;
-    final errorMessage = ref.watch(errorMessageProvider); //エラーを監視
 
-    //エラーメッセージが更新された際にユーザーに通知
-    if (errorMessage != null) {
-      ErrorHandler.instance.showAndResetError(errorMessage, context, ref);
-    }
+    // アカウント作成成功後の画面遷移
+    ref.listen<AccountState>(accountManagerProvider, (_, state) {
+      _handleAccountCreation(state);
+    });
 
     // ローディング中でない場合、UIを表示
-    return loader == false
+    return accountState.isLoading == false
         ? Scaffold(
             resizeToAvoidBottomInset: false,
             backgroundColor: AppColors.baseColor,
@@ -136,7 +132,7 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
   Widget _buildProfileAvatar() {
     return ProfileAvatar(
       localImage: image,
-      networkImagePath: ref.read(accountStateNotifierProvider).imagePath,
+      networkImagePath: ref.read(accountManagerProvider).imagePath,
       onTap: () => _showBottomSheetMenu(context),
     );
   }
@@ -147,9 +143,8 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
       width: 300,
       child: CustomTextFiled(
         controller: _nameController,
-        func: (value) => ref
-            .read(accountStateNotifierProvider.notifier)
-            .onUserNameChange(value),
+        func: (value) =>
+            ref.read(accountManagerProvider.notifier).onUserNameChange(value),
       ),
     );
   }
@@ -190,7 +185,7 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ImageUtils.shouldShowDefaultImage(
-                      image, ref.read(accountStateNotifierProvider).imagePath)
+                      image, ref.read(accountManagerProvider).imagePath)
                   ? const SizedBox()
                   : ListTile(
                       title: const Text(
@@ -223,19 +218,16 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
   //ユーザー更新処理
   Future<void> _updateUserAccount() async {
     ref
-        .read(accountStateNotifierProvider.notifier)
+        .read(accountManagerProvider.notifier)
         .onUserNameChange(_nameController.text);
-    final result = await ref
-        .read(accountViewModelProvider.notifier)
+    await ref
+        .read(accountManagerProvider.notifier)
         .updateUserAccount(isImageDeleted, ref);
-
-    _handleAccountCreation(result);
   }
 
   //画面遷移
-  void _handleAccountCreation(bool state) {
-    if (state == true) {
-      print("画面遷移されない");
+  void _handleAccountCreation(AccountState state) {
+    if (state.updateIsEditing) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
@@ -249,11 +241,9 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
         backgroundColor: Colors.white,
         textColor: Colors.black,
       );
-      ref
-          .read(accountStateNotifierProvider.notifier)
-          .onUserIsAccountCreatedSuccessfully(false);
+    } else {
+      return;
     }
-    print("呼ばれた");
   }
 
   // 画像の削除または追加を行う処理
@@ -263,10 +253,10 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
       if (isDeleting) {
         // 画像削除の処理
         await ImageManager.deleteImage(
-            ref.read(accountStateNotifierProvider).imagePath.toString());
+            ref.read(accountManagerProvider).imagePath.toString());
         image = null;
         // myAccount.imagePath = "";
-        ref.read(accountStateNotifierProvider.notifier).onUserImageChange("");
+        ref.read(accountManagerProvider.notifier).onUserImageChange("");
         isImageDeleted = true;
       } else {
         // 画像追加の処理
@@ -274,7 +264,7 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
         if (result != null) {
           image = File(result.path);
           ref
-              .read(accountStateNotifierProvider.notifier)
+              .read(accountManagerProvider.notifier)
               .onUserImageChange(image!.path);
         }
       }

@@ -1,11 +1,5 @@
-// 一般的なエラーメッセージを生成する関数
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
-
-import '../dialogs/snackbar_utils.dart';
-import '../state/providers/providers.dart';
 
 String firebaseErrorMessage(dynamic error) {
   if (error is FirebaseException) {
@@ -63,46 +57,8 @@ String getErrorMessage(dynamic error) {
   }
 }
 
-void handleError(dynamic error, BuildContext context) {
-  String errorMessage = getErrorMessage(error);
-  showErrorSnackBar(context: context, text: errorMessage);
-}
-
-//カスタムエラーの作成
-class DataLayerException implements Exception {
-  final String message;
-
-  DataLayerException(this.message);
-
-  @override
-  String toString() => "DataLayerException: $message";
-}
-
-class ErrorHandler {
-  // プライベートなコンストラクタ
-  ErrorHandler._internal();
-
-  // クラスの唯一のインスタンス
-  static final ErrorHandler _instance = ErrorHandler._internal();
-
-  // インスタンスへのアクセス用の公開されたゲッター
-  static ErrorHandler get instance => _instance;
-
-  // エラーメッセージを表示し、エラーステートをリセットする
-  void showAndResetError(
-      String errorMessage, BuildContext context, WidgetRef ref) {
-    showErrorSnackBar(context: context, text: errorMessage);
-    ref.read(errorMessageProvider.notifier).state = null;
-  }
-
-  // エラーステートを設定する
-  void setErrorState(WidgetRef ref, String message) {
-    ref.read(errorMessageProvider.notifier).state = message;
-  }
-}
-
 class HttpStatusErrorMessage {
-  static String getMessage(int statusCode) {
+  static String getHttpMessage(int statusCode) {
     switch (statusCode) {
       case 400:
         return '不正なリクエストです。入力内容を確認してください。';

@@ -2,11 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../dialogs/dialogs.dart';
-import '../dialogs/snackbar_utils.dart';
-import '../models/choice_model.dart';
+import '../dialogs/custom_dialogs.dart';
+import '../dialogs/snackbar.dart';
 import '../models/posts/game_model.dart';
 import '../models/posts/team_model.dart';
+import '../models/user_choice.dart';
 import '../state/providers/account/account_notifier.dart';
 import '../state/providers/games/game_post_provider.dart';
 import '../state/providers/games/my_game_post_provider.dart';

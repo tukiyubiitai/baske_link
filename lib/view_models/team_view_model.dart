@@ -1,4 +1,5 @@
 import 'package:basketball_app/infrastructure/firebase/team_posts_firebase.dart';
+import 'package:basketball_app/state/providers/providers.dart';
 import 'package:basketball_app/view_models/post_view_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -9,7 +10,7 @@ import '../../infrastructure/firebase/account_firebase.dart';
 import '../../models/account/account.dart';
 import '../../models/posts/team_model.dart';
 import '../../utils/error_handler.dart';
-import '../dialogs/snackbar_utils.dart';
+import '../dialogs/snackbar.dart';
 import '../state/providers/account/account_notifier.dart';
 import '../state/providers/global_loader.dart';
 import '../state/providers/post/age_notifier.dart';
@@ -33,7 +34,7 @@ class TeamPostViewModel extends ChangeNotifier {
     var ageState = ref.read(ageStateProvider);
     var targetState = ref.read(targetStateProvider);
     final tagProvider = ref.read(tagAreaStateProvider);
-    final accountState = ref.read(accountStateNotifierProvider);
+    final accountState = ref.read(accountManagerProvider);
 
     String teamName = teamState.teamName;
     String activityTime = teamState.activityTime;
@@ -105,7 +106,7 @@ class TeamPostViewModel extends ChangeNotifier {
     var ageState = ref.read(ageStateProvider);
     var targetState = ref.read(targetStateProvider);
     final tagProvider = ref.read(tagAreaStateProvider);
-    final accountState = ref.read(accountStateNotifierProvider);
+    final accountState = ref.read(accountManagerProvider);
 
     final myAccount = ref.read(accountNotifierProvider);
 

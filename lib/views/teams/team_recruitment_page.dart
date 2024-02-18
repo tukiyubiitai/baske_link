@@ -1,7 +1,7 @@
+import 'package:basketball_app/state/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../state/providers/account/account_notifier.dart';
 import '../../state/providers/team/team_post_provider.dart';
 import '../../widgets/modal_sheet.dart';
 import '../../widgets/progress_indicator.dart';
@@ -13,7 +13,7 @@ class TeamRecruitmentPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final teamPostDataAsyncValue = ref.watch(teamPostNotifierProvider);
-    ref.watch(accountStateNotifierProvider);
+    ref.watch(accountManagerProvider);
 
     return Scaffold(
       backgroundColor: Colors.indigo[900],

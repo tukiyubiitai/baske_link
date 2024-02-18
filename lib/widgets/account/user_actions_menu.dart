@@ -1,12 +1,11 @@
+import 'package:basketball_app/state/providers/providers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../models/choice_model.dart';
-import '../../../utils/error_handler.dart';
-import '../../dialogs/dialogs.dart';
-import '../../dialogs/snackbar_utils.dart';
-import '../../view_models/account_view_model.dart';
+import '../../../models/user_choice.dart';
+import '../../dialogs/custom_dialogs.dart';
+import '../../dialogs/snackbar.dart';
 import '../../views/auth/first_page.dart';
 
 // ユーザーのアクション（ログアウトやアカウント削除）を提供するメニューを表示するウィジェット
@@ -115,7 +114,9 @@ class UserActionsMenu extends ConsumerWidget {
 
   Future<void> deleteUser(WidgetRef ref) async {
     try {
-      final result = await AccountViewModel().deleteUserAccount(ref);
+      final result = await ref
+          .read(accountManagerProvider.notifier)
+          .deleteUserAccount(ref);
       if (result) {
         showSnackBar(
             context: ref.context,
@@ -126,7 +127,6 @@ class UserActionsMenu extends ConsumerWidget {
       }
     } catch (e) {
       Navigator.pop(ref.context);
-      handleError(e, ref.context);
     }
   }
 

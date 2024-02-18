@@ -5,7 +5,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../infrastructure/firebase/account_firebase.dart';
-import '../../utils/error_handler.dart';
 import '../utils/loading_manager.dart';
 import '../utils/logger.dart';
 
@@ -34,7 +33,6 @@ class AuthViewModel extends ChangeNotifier {
       return await authenticateUser(user);
     } catch (e) {
       AppLogger.instance.error("サインインに失敗 $e");
-      ErrorHandler.instance.setErrorState(ref, getErrorMessage(e));
       return false;
     } finally {
       LoadingManager.instance.stopLoading(ref);
@@ -53,7 +51,6 @@ class AuthViewModel extends ChangeNotifier {
     } catch (e) {
       //エラーハンドリング
       AppLogger.instance.error("サインインに失敗 $e");
-      ErrorHandler.instance.setErrorState(ref, getErrorMessage(e));
       return false;
     } finally {
       //ロード開始
@@ -73,7 +70,6 @@ class AuthViewModel extends ChangeNotifier {
     } catch (e) {
       //エラーハンドリング
       AppLogger.instance.error("サインインに失敗 $e");
-      ErrorHandler.instance.setErrorState(ref, getErrorMessage(e));
       return false;
     } finally {
       //ロード開始

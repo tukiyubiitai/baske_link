@@ -3,9 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_signin_button/button_list.dart';
 import 'package:flutter_signin_button/button_view.dart';
 
-import '../../../utils/error_handler.dart';
-import '../../view_models/auth_view_model.dart';
 import '../../bottom_navigation.dart';
+import '../../view_models/auth_view_model.dart';
 import '../../widgets/progress_indicator.dart';
 import '../account/create_account_page.dart';
 
@@ -75,9 +74,7 @@ class SignInScreen extends ConsumerWidget {
           ),
         );
       }
-    } catch (e) {
-      handleError(e, ref.context);
-    }
+    } catch (e) {}
   }
 
 // Appleサインインの処理
@@ -101,9 +98,7 @@ class SignInScreen extends ConsumerWidget {
           ),
         );
       }
-    } catch (e) {
-      handleError(e, ref.context);
-    }
+    } catch (e) {}
   }
 }
 
