@@ -3,17 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../infrastructure/firebase/storage_firebase.dart';
-import '../../../infrastructure/image_processing/image_processing_utils.dart';
 import '../../../utils/image_utils.dart';
-import '../../../utils/loading_manager.dart';
 import '../../bottom_navigation.dart';
 import '../../dialogs/snackbar.dart';
 import '../../models/account/account.dart';
 import '../../models/color/app_colors.dart';
 import '../../state/providers/providers.dart';
 import '../../widgets/account/user_profile_circle.dart';
-import '../../widgets/common_widgets/back_button_widget.dart';
 import '../../widgets/progress_indicator.dart';
 
 //ユーザー編集ページ
@@ -56,38 +52,32 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
     });
 
     // ローディング中でない場合、UIを表示
-    return accountState.isLoading == false
-        ? Scaffold(
-            resizeToAvoidBottomInset: false,
-            backgroundColor: AppColors.baseColor,
-            appBar: AppBar(
-              leading: backButton(context),
-              elevation: 0,
-              backgroundColor: AppColors.baseColor,
-              title: const Text(
-                "アカウント編集",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            body: Stack(
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor: AppColors.baseColor,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: AppColors.baseColor,
+        title: const Text("アカウント編集", style: TextStyle(color: Colors.white)),
+      ),
+      body: accountState.isLoading
+          ? ScaffoldShowProgressIndicator(
+              textColor: AppColors.secondary,
+              indicatorColor: AppColors.secondary,
+            )
+          : Stack(
               children: [
-                // 背景コンテナ
                 _buildBackgroundContainer(),
                 SingleChildScrollView(
                   reverse: true,
                   child: Padding(
                     padding: EdgeInsets.only(bottom: bottomSpace),
-                    // 主要コンテンツ
                     child: _buildContent(),
                   ),
                 ),
               ],
             ),
-          )
-        : ScaffoldShowProgressIndicator(
-            textColor: AppColors.secondary,
-            indicatorColor: AppColors.secondary,
-          ); //ローディング中はインジケータを表示
+    );
   }
 
   // 背景コンテナ
@@ -97,7 +87,10 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(60),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(60),
+            topRight: Radius.circular(60),
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.3),
@@ -207,14 +200,18 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
                       ),
                       onTap: () async {
                         Navigator.of(context).pop();
-                        await processImageAction(context, true);
+                        await ref
+                            .read(accountManagerProvider.notifier)
+                            .processImageAction(true);
                       }),
               ListTile(
                   title: const Text('画像を変更または追加'),
                   leading: const Icon(Icons.image),
                   onTap: () async {
                     Navigator.of(context).pop();
-                    await processImageAction(context, false);
+                    await ref
+                        .read(accountManagerProvider.notifier)
+                        .processImageAction(false);
                   }),
               const SizedBox(
                 height: 30,
@@ -255,30 +252,32 @@ class _UserSettingPageState extends ConsumerState<UserSettingPage> {
     }
   }
 
-  // 画像の削除または追加を行う処理
-  Future<void> processImageAction(BuildContext context, bool isDeleting) async {
-    try {
-      LoadingManager.instance.startLoading(ref);
-      if (isDeleting) {
-        // 画像削除の処理
-        await ImageManager.deleteImage(
-            ref.read(accountManagerProvider).imagePath.toString());
-        image = null;
-        // myAccount.imagePath = "";
-        ref.read(accountManagerProvider.notifier).onUserImageChange("");
-        isImageDeleted = true;
-      } else {
-        // 画像追加の処理
-        var result = await cropImage();
-        if (result != null) {
-          image = File(result.path);
-          ref
-              .read(accountManagerProvider.notifier)
-              .onUserImageChange(image!.path);
-        }
-      }
-    } finally {
-      LoadingManager.instance.stopLoading(ref);
-    }
-  }
+// 画像の削除または追加を行う処理
+// Future<void> processImageAction(BuildContext context, bool isDeleting) async {
+//   try {
+//     var accountState = ref.read(accountManagerProvider);
+//
+//     LoadingManager.instance.startLoading(ref);
+//     if (isDeleting) {
+//       // 画像削除の処理
+//       await ImageManager.deleteImage(
+//           ref.read(accountManagerProvider).imagePath.toString());
+//       image = null;
+//       // myAccount.imagePath = "";
+//       ref.read(accountManagerProvider.notifier).onUserImageChange("");
+//       isImageDeleted = true;
+//     } else {
+//       // 画像追加の処理
+//       var result = await cropImage();
+//       if (result != null) {
+//         image = File(result.path);
+//         ref
+//             .read(accountManagerProvider.notifier)
+//             .onUserImageChange(image!.path);
+//       }
+//     }
+//   } finally {
+//     LoadingManager.instance.stopLoading(ref);
+//   }
+// }
 }

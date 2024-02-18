@@ -4,8 +4,6 @@ import 'package:basketball_app/models/color/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../infrastructure/image_processing/image_processing_utils.dart';
-import '../../../utils/loading_manager.dart';
 import '../../bottom_navigation.dart';
 import '../../dialogs/snackbar.dart';
 import '../../models/account/account.dart';
@@ -71,7 +69,6 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
               ],
             ),
     );
-    //
   }
 
   // 背景コンテナ
@@ -82,14 +79,15 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: const BorderRadius.only(
-            topRight: Radius.circular(60),
             topLeft: Radius.circular(60),
+            topRight: Radius.circular(60),
           ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.3),
               spreadRadius: 3,
-              blurRadius: 10, offset: const Offset(0, 1), // 影の位置調整
+              blurRadius: 10,
+              offset: const Offset(0, 1),
             ),
           ],
         ),
@@ -119,7 +117,9 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
   Widget _buildProfileAvatar(BuildContext context) {
     return ProfileAvatar(
       localImage: image,
-      onTap: () async => await onSelectProfileImage(context),
+      onTap: () async => await ref
+          .read(accountManagerProvider.notifier)
+          .onSelectProfileImage(),
     );
   }
 
@@ -146,10 +146,6 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
       padding: const EdgeInsets.all(8.0),
       child: ElevatedButton(
         onPressed: () async {
-          if (_nameController.text.isEmpty) {
-            showErrorSnackBar(context: context, text: "名前が入力されていないです");
-            return;
-          }
           ref
               .read(accountManagerProvider.notifier)
               .onUserNameChange(_nameController.text);
@@ -192,25 +188,6 @@ class _TestCreateAccountState extends ConsumerState<CreateAccount> {
       );
     } else {
       return;
-    }
-  }
-
-  //プロフィール画像の設定
-  Future<void> onSelectProfileImage(BuildContext context) async {
-    try {
-      //ロード開始
-      LoadingManager.instance.startLoading(ref);
-      var result = await cropImage();
-      if (result != null) {
-        image = File(result.path);
-        //画像をaccountStateに保存
-        ref
-            .read(accountManagerProvider.notifier)
-            .onUserImageChange(image!.path);
-      }
-    } finally {
-      //ロード終了
-      LoadingManager.instance.stopLoading(ref);
     }
   }
 }
