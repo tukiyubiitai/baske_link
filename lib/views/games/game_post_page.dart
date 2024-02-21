@@ -1,20 +1,18 @@
 import 'dart:io';
 
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:basketball_app/state/providers/providers.dart';
+import 'package:basketball_app/view_models/game_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../infrastructure/image_processing/image_processing_utils.dart';
-import '../../../utils/filter_functions.dart';
+import '../../bottom_navigation.dart';
 import '../../dialogs/snackbar.dart';
 import '../../models/posts/chip_Item.dart';
 import '../../models/posts/game_model.dart';
-import '../../state/providers/games/game_post_notifier.dart';
-import '../../state/providers/global_loader.dart';
 import '../../state/providers/post/age_notifier.dart';
 import '../../state/providers/post/tag_area_notifier.dart';
-import '../../view_models/game_view_model.dart';
+import '../../utils/filter_functions.dart';
 import '../../widgets/area_dropdown_menu_widget.dart';
 import '../../widgets/common_widgets/back_button_widget.dart';
 import '../../widgets/post/image_widget.dart';
@@ -29,24 +27,20 @@ class GamePostPage extends ConsumerStatefulWidget {
   const GamePostPage({required this.isEditing, this.postId, super.key});
 
   @override
-  ConsumerState<GamePostPage> createState() => _NewGamePostPageState();
+  ConsumerState<GamePostPage> createState() => _GamePostPage1State();
 }
 
-class _NewGamePostPageState extends ConsumerState<GamePostPage> {
+class _GamePostPage1State extends ConsumerState<GamePostPage> {
   final TextEditingController _teamController = TextEditingController();
   final TextEditingController _memberController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
 
-  final FirebaseStorage storage = FirebaseStorage.instance;
-  late GamePostViewModel _controller;
   int? integerValue;
   File? image;
   String? imageUrl;
 
   @override
   void initState() {
-    // コントローラーの初期化とデータの読み込み
-    _controller = GamePostViewModel();
     _initData();
     super.initState();
   }
@@ -59,59 +53,73 @@ class _NewGamePostPageState extends ConsumerState<GamePostPage> {
     super.dispose();
   }
 
-  //編集モードか判断
-  Future<void> _initData() async {
-    try {
-      if (widget.postId != null) {
-        final post =
-            await _controller.initSetData(widget.postId!, widget.isEditing);
-        if (post != null) {
-          _updateStateProviders(post);
-          _setTextFieldValues(post);
-          imageUrl = post.imageUrl;
-        }
-      }
-    } catch (e) {}
-  }
-
   //テキストフィールドの設定
   void _setTextFieldValues(GamePost post) {
     _teamController.text = post.teamName;
     _memberController.text = post.member;
-    _noteController.text = post.note ?? "";
+    _noteController.text = post.note;
   }
 
-  //状態の設定
+  void _setStateProviders() {
+    ref.read(gamePostManagerProvider.notifier)
+      ..addTeamName(_teamController.text)
+      ..addMember(_memberController.text)
+      ..addNote(_noteController.text);
+  }
+
+  // 投稿データをRiverpodの状態管理に反映
   void _updateStateProviders(GamePost post) {
-    ref.read(gameStateNotifierProvider.notifier)
-      ..onTeamNameChange(post.teamName)
-      ..onMemberChange(post.member.toString())
-      ..onNoteChange(post.note.toString())
-      ..onPrefectureChange(post.prefecture)
-      ..onLocationTagStringChange(post.locationTagList.join(","))
-      ..onAgeListChange(post.ageList.join(","))
-      ..onLevelChange(post.level)
-      ..addOldImage(post.imageUrl);
+    ref.read(gamePostManagerProvider.notifier)
+      ..addTeamName(post.teamName)
+      ..addMember(post.member.toString())
+      ..addNote(post.note.toString())
+      ..addPrefecture(post.prefecture)
+      ..addLocationTagString(post.locationTagList)
+      ..addAgeList(post.ageList)
+      ..addLevel(post.level)
+      ..addOldImage(post.imagePath);
     ref
         .read(tagAreaStateProvider.notifier)
         .addTag(post.locationTagList.join(","));
     ref.read(ageStateProvider.notifier).updateSelectedValue(post.ageList);
   }
 
+  // 編集モードであれば、既存の投稿データをUIに反映
+  Future<void> _initData() async {
+    try {
+      if (widget.postId != null) {
+        final post = await GamePostManager()
+            .initSetData(widget.postId!, widget.isEditing);
+        if (post != null) {
+          _updateStateProviders(post);
+          _setTextFieldValues(post);
+          imageUrl = post.imagePath;
+        }
+      }
+    } catch (e) {}
+  }
+
   @override
   Widget build(BuildContext context) {
-    ref.watch(gameStateNotifierProvider);
+    // 現在のゲーム投稿状態を監視
+    final gamePostState = ref.watch(gamePostManagerProvider);
     final ageProvider = ref.watch(ageStateProvider);
-    final areaTagProvider = ref.watch(tagAreaStateProvider);
-    final loader = ref.watch(globalLoaderProvider);
+
+    // アカウント作成成功後の画面遷移
+    ref.listen<GamePost>(gamePostManagerProvider, (_, state) {
+      // isAccountCreatedSuccessfullyがtrueに変わった場合にのみ実行
+      if (state.isGamePostSuccessful) {
+        //画面遷移
+        _handleGamePostCreation(state);
+      }
+    });
 
     final focusNode = FocusNode();
-
     return Focus(
       focusNode: focusNode,
       child: GestureDetector(
         onTap: focusNode.requestFocus,
-        child: loader == false
+        child: gamePostState.isLoading == false
             ? Scaffold(
                 backgroundColor: Colors.indigo[900],
                 appBar: AppBar(
@@ -126,33 +134,8 @@ class _NewGamePostPageState extends ConsumerState<GamePostPage> {
                   ),
                   actions: [
                     TextButton(
-                      onPressed: () async {
-                        if (widget.isEditing == false) {
-                          //新規登録処理
-                          ref
-                              .read(gameStateNotifierProvider.notifier)
-                              .onLocationTagStringChange(
-                                  areaTagProvider.join(","));
-                          ref
-                              .read(gameStateNotifierProvider.notifier)
-                              .onAgeListChange(ageProvider.join(","));
-
-                          //保存処理
-                          await gamePostSubmit();
-                        } else {
-                          //編集処理
-                          ref
-                              .read(gameStateNotifierProvider.notifier)
-                              .onLocationTagStringChange(
-                                  areaTagProvider.join(","));
-                          ref
-                              .read(gameStateNotifierProvider.notifier)
-                              .onAgeListChange(ageProvider.join(","));
-
-                          //更新処理
-                          await gamePostUpdate(widget.postId as String);
-                        }
-                      },
+                      // 投稿処理または更新処理
+                      onPressed: () async => _handlePostSubmission,
                       child: Text(
                         widget.isEditing ? '更新' : '投稿',
                         style: const TextStyle(
@@ -185,7 +168,9 @@ class _NewGamePostPageState extends ConsumerState<GamePostPage> {
                             HeaderImageWidget(
                               imageUrl: imageUrl,
                               image: image,
-                              onTap: handleHeaderImageTap,
+                              onTap: ref
+                                  .read(gamePostManagerProvider.notifier)
+                                  .handleHeaderImageTap,
                             ),
                             //エリア
                             ClipRRect(
@@ -208,15 +193,12 @@ class _NewGamePostPageState extends ConsumerState<GamePostPage> {
                               SizedBox(
                                 height: 20,
                               ),
-                              RequiredCustomTextField(
+                              RequiredCustomTextFieldNoFunc(
                                 controller: _teamController,
                                 labelText: 'チーム名',
                                 hintText: 'チーム名を入力してください',
                                 prefixIcon: Icons.diversity_3,
                                 maxLength: 15,
-                                func: (value) => ref
-                                    .read(gameStateNotifierProvider.notifier)
-                                    .onTeamNameChange(value),
                               ),
                               // 詳しい場所のタグ
                               TagChipsField(
@@ -225,15 +207,12 @@ class _NewGamePostPageState extends ConsumerState<GamePostPage> {
                               SizedBox(
                                 height: 10,
                               ),
-                              CustomTextField(
+                              CustomTextFieldNoFunc(
                                 labelText: 'チームの構成メンバー',
                                 hintText: '構成メンバーを入力してください',
                                 prefixIcon: Icons.tour,
                                 maxLength: 25,
                                 controller: _memberController,
-                                func: (value) => ref
-                                    .read(gameStateNotifierProvider.notifier)
-                                    .onMemberChange(value),
                               ),
                               CustomTextRich(
                                 mainText: 'チームの年齢層',
@@ -279,7 +258,7 @@ class _NewGamePostPageState extends ConsumerState<GamePostPage> {
                               RatingBar.builder(
                                 initialRating: widget.isEditing
                                     ? ref
-                                        .read(gameStateNotifierProvider)
+                                        .read(gamePostManagerProvider)
                                         .level
                                         .toDouble()
                                     : 0.0,
@@ -288,11 +267,11 @@ class _NewGamePostPageState extends ConsumerState<GamePostPage> {
                                   color: Colors.indigo,
                                 ),
                                 onRatingUpdate: (rating) {
-                                  print(rating);
-                                  integerValue = rating.toInt();
+                                  integerValue =
+                                      rating.toInt(); // ratingをintに変換
                                   ref
-                                      .read(gameStateNotifierProvider.notifier)
-                                      .onLevelChange(integerValue!);
+                                      .read(gamePostManagerProvider.notifier)
+                                      .addLevel(integerValue!);
                                 },
                                 itemCount: 3,
                               ),
@@ -300,14 +279,11 @@ class _NewGamePostPageState extends ConsumerState<GamePostPage> {
                               const SizedBox(
                                 height: 10,
                               ),
-                              CustomTextField(
+                              CustomTextFieldNoFunc(
                                 labelText: "自由欄",
                                 prefixIcon: Icons.sports_basketball_outlined,
                                 hintText: '自由欄です',
                                 controller: _noteController,
-                                func: (value) => ref
-                                    .read(gameStateNotifierProvider.notifier)
-                                    .onNoteChange(value),
                               ),
                             ],
                           ),
@@ -325,61 +301,47 @@ class _NewGamePostPageState extends ConsumerState<GamePostPage> {
                 )),
       ),
     );
-  }
+  } // 投稿の保存または更新を行うメソッド
 
-  //画像追加処理
-  Future<void> handleHeaderImageTap() async {
-    try {
-      // ローダーを表示
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(true);
+  Future<void> _handlePostSubmission() async {
+    final ageProvider = ref.read(ageStateProvider);
+    final areaTagProvider = ref.read(tagAreaStateProvider);
+    _setStateProviders(); // 状態管理プロバイダーに現在のフォーム値を設定
+    ref
+        .read(gamePostManagerProvider.notifier)
+        .addLocationTagString(areaTagProvider);
+    ref.read(gamePostManagerProvider.notifier).addAgeList(ageProvider);
 
-      // 画像を選択するためのロジック（たとえば、画像ピッカーを表示）
-      var result = await cropHeaderImage();
-      if (result != null) {
-        // 選択した画像をFileオブジェクトに変換
-        image = File(result.path);
-        // 画像のパスをコントローラに設定
-        ref.read(gameStateNotifierProvider.notifier).onImageChange(image!.path);
-        //新しい画像が追加されたら、元々の画像をnullにして、表示させる
-        imageUrl = null;
-      }
-    } catch (e) {
-      // エラー処理
-    } finally {
-      // ローダーを非表示
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(false);
+    if (!widget.isEditing) {
+      // 新規投稿の保存処理
+      await ref.read(gamePostManagerProvider.notifier).gamePostSubmit(ref);
+    } else {
+      // 既存投稿の更新処理
+      await ref
+          .read(gamePostManagerProvider.notifier)
+          .updateGamePost(widget.postId!, ref);
     }
   }
 
-  //保存
-  Future<void> gamePostSubmit() async {
-    try {
-      final result = await _controller.gamePostSubmit(ref);
-      if (result) {
-        showSnackBar(
-          context: ref.context,
-          text: "投稿が完了しました！",
-          backgroundColor: Colors.white,
-          textColor: Colors.black,
-        );
-        Navigator.popUntil(ref.context, (route) => route.isFirst);
-      }
-    } catch (e) {}
-  }
-
-  //更新
-  Future<void> gamePostUpdate(String postId) async {
-    try {
-      final result = await _controller.updateGamePost(postId, ref);
-      if (result) {
-        showSnackBar(
-          context: ref.context,
-          text: "更新が完了しました！",
-          backgroundColor: Colors.white,
-          textColor: Colors.black,
-        );
-        Navigator.popUntil(ref.context, (route) => route.isFirst);
-      }
-    } catch (e) {}
+  // 投稿完了後の処理
+  void _handleGamePostCreation(GamePost state) {
+    if (state.isGamePostSuccessful) {
+      state = state.copyWith(isGamePostSuccessful: false);
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BottomTabNavigator(initialIndex: 3),
+        ),
+        (route) => false,
+      );
+      showSnackBar(
+        context: context,
+        text: "投稿が完了しました！",
+        backgroundColor: Colors.white,
+        textColor: Colors.black,
+      );
+    } else {
+      return;
+    }
   }
 }

@@ -11,7 +11,7 @@ class GameSearchNotifier extends _$GameSearchNotifier {
   Future<GamePostData> build(
       String? selectedLocation, String? keywordLocation) async {
     try {
-      final gamePostData = await GamePostViewModel()
+      final gamePostData = await GamePostManager()
           .retrieveFilteredGamePosts(selectedLocation, keywordLocation);
       return gamePostData;
     } catch (e, stack) {

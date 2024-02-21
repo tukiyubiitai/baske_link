@@ -1,4 +1,5 @@
 //投稿の編集と削除
+import 'package:basketball_app/state/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -148,8 +149,8 @@ class _TestActionState extends ConsumerState<PostAction> {
             await TeamPostViewModel().deleteTeamPost(widget.teamPostData!, ref);
       } else if (widget.gamePostData != null) {
         // GamePostの削除処理
-        result =
-            await GamePostViewModel().deleteGamePost(widget.gamePostData!, ref);
+        await GamePostManager().deleteGamePost(widget.gamePostData!, ref);
+        result = ref.read(gamePostManagerProvider).isGamePostSuccessful;
       }
       if (result) {
         //画面遷移

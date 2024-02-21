@@ -1,53 +1,100 @@
+import 'dart:io';
+
 import 'package:basketball_app/infrastructure/firebase/game_posts_firebase.dart';
 import 'package:basketball_app/view_models/post_view_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../infrastructure/firebase/account_firebase.dart';
 import '../../models/account/account.dart';
 import '../../models/posts/game_model.dart';
-import '../../utils/error_handler.dart';
 import '../dialogs/snackbar.dart';
+import '../infrastructure/image_processing/image_processing_utils.dart';
 import '../state/providers/account/account_notifier.dart';
-import '../state/providers/games/game_post_notifier.dart';
 import '../state/providers/games/game_post_provider.dart';
 import '../state/providers/games/my_game_post_provider.dart';
-import '../state/providers/global_loader.dart';
 import '../state/providers/post/age_notifier.dart';
 import '../state/providers/post/tag_area_notifier.dart';
 import '../utils/loading_manager.dart';
 import '../utils/logger.dart';
 
-class GamePostViewModel extends ChangeNotifier {
+class GamePostManager extends StateNotifier<GamePost> {
   static final _firestoreInstance = FirebaseFirestore.instance;
+
+  GamePostManager()
+      : super(GamePost(
+            postAccountId: "",
+            locationTagList: [],
+            prefecture: "",
+            level: 0,
+            teamName: "",
+            createdTime: Timestamp.now(),
+            member: "",
+            ageList: [],
+            type: "game"));
 
   static final CollectionReference gamePosts =
       _firestoreInstance.collection('gamePosts');
 
   final FirebaseStorage storage = FirebaseStorage.instance;
 
+  void addTeamName(String teamName) {
+    state = state.copyWith(teamName: teamName);
+  }
+
+  void addPrefecture(String prefecture) {
+    state = state.copyWith(prefecture: prefecture);
+  }
+
+  void addLocationTagString(List<String> locationTagString) {
+    state = state.copyWith(locationTagList: locationTagString);
+  }
+
+  void addLevel(int level) {
+    state = state.copyWith(level: level);
+  }
+
+  void addMember(String member) {
+    state = state.copyWith(member: member);
+  }
+
+  void addAgeList(List<String> ageList) {
+    state = state.copyWith(ageList: ageList);
+  }
+
+  void addNote(String note) {
+    state = state.copyWith(note: note);
+  }
+
+  void addImage(String imageUrl) {
+    state = state.copyWith(imagePath: imageUrl);
+  }
+
+  void addOldImage(String oldImageUrl) {
+    state = state.copyWith(oldImagePath: oldImageUrl);
+  }
+
   //gamePost保存
-  Future<bool> gamePostSubmit(WidgetRef ref) async {
-    var gamePostState = ref.read(gameStateNotifierProvider);
+  Future<void> gamePostSubmit(WidgetRef ref) async {
+    state = state.copyWith(isLoading: true); // 読み込み開始
+
+    var gamePostState = state;
     var ageTag = ref.read(ageStateProvider);
     final locationTag = ref.read(tagAreaStateProvider);
     final Account myAccount = ref.read(accountNotifierProvider);
-    //ローカルからデータを取ってくる
 
     String teamName = gamePostState.teamName;
-
     String prefecture = gamePostState.prefecture;
     String member = gamePostState.member;
     String note = gamePostState.note.toString();
     int level = gamePostState.level;
 
-    String? imageUrl = gamePostState.imageUrl;
+    String? imageUrl = gamePostState.imagePath;
 
     // 入力検証のロジック
     if (!isValidGameState(ref)) {
-      return false;
+      return;
     }
 
     try {
@@ -55,9 +102,9 @@ class GamePostViewModel extends ChangeNotifier {
       LoadingManager.instance.startLoading(ref);
 
       // 画像をアップロードしてURLを取得
-      final String? url = imageUrl != null && imageUrl.isNotEmpty
+      final String? url = imageUrl.isNotEmpty
           ? await PostViewModel().uploadPostImage(imageUrl, "")
-          : null;
+          : "";
 
       GamePost newPost = GamePost(
         postAccountId: myAccount.id,
@@ -69,7 +116,7 @@ class GamePostViewModel extends ChangeNotifier {
         member: member,
         ageList: ageTag,
         type: 'game',
-        imageUrl: url,
+        imagePath: url.toString(),
         note: note,
       );
 
@@ -79,21 +126,22 @@ class GamePostViewModel extends ChangeNotifier {
       if (result) {
         //画面更新処理
         await ref.read(gamePostNotifierProvider.notifier).reloadGamePostData();
-        return true;
+        state = state.copyWith(isGamePostSuccessful: true); // 投稿完了を知らせる
+        return;
       }
-      return false;
     } catch (e) {
       AppLogger.instance.error("投稿失敗 $e");
     } finally {
       //終了
-      LoadingManager.instance.stopLoading(ref);
+      state = state.copyWith(isLoading: false); //  ロード終了
     }
-    return false;
   }
 
   //gamePost更新
-  Future<bool> updateGamePost(String postId, WidgetRef ref) async {
-    var gamePostState = ref.read(gameStateNotifierProvider);
+  Future<void> updateGamePost(String postId, WidgetRef ref) async {
+    state = state.copyWith(isLoading: true); // 読み込み開始
+
+    var gamePostState = state;
     var ageTag = ref.read(ageStateProvider);
     final locationTag = ref.read(tagAreaStateProvider);
 
@@ -105,11 +153,11 @@ class GamePostViewModel extends ChangeNotifier {
     String note = gamePostState.note.toString();
     int level = gamePostState.level;
 
-    String? imageUrl = gamePostState.imageUrl;
-    String oldImagePath = gamePostState.oldImageUrl ?? '';
+    String? imageUrl = gamePostState.imagePath;
+    String oldImagePath = gamePostState.oldImagePath;
     // 入力検証のロジック
     if (!isValidGameState(ref)) {
-      return false;
+      return;
     }
 
     try {
@@ -130,7 +178,7 @@ class GamePostViewModel extends ChangeNotifier {
         member: member,
         ageList: ageTag,
         type: 'game',
-        imageUrl: url,
+        imagePath: url.toString(),
         note: note,
       );
 
@@ -144,21 +192,20 @@ class GamePostViewModel extends ChangeNotifier {
             .read(myGamePostNotifierProvider(myAccount).notifier)
             .reloadPosts(myAccount);
         ref.read(gamePostNotifierProvider.notifier).reloadGamePostData();
-        return true;
+        state = state.copyWith(isGamePostSuccessful: true); // 投稿完了を知らせる
+        return;
       }
-      return false;
     } catch (e) {
       AppLogger.instance.error("投稿更新失敗 $e");
     } finally {
       //終了
-      LoadingManager.instance.stopLoading(ref);
+      state = state.copyWith(isLoading: false); // 読み込み開始
     }
-    return false;
   }
 
   //投稿削除する関数
-  Future<bool> deleteGamePost(GamePost gamePost, WidgetRef ref) async {
-    ref.read(globalLoaderProvider.notifier).setLoaderValue(true);
+  Future<void> deleteGamePost(GamePost gamePost, WidgetRef ref) async {
+    state = state.copyWith(isLoading: true); // 読み込み開始
 
     final myAccount = ref.read(accountNotifierProvider);
 
@@ -168,7 +215,7 @@ class GamePostViewModel extends ChangeNotifier {
         gamePost.id,
         gamePost.postAccountId,
         gamePost.type,
-        gamePost.imageUrl ?? "",
+        gamePost.imagePath,
         "",
       );
 
@@ -180,28 +227,26 @@ class GamePostViewModel extends ChangeNotifier {
             .read(myGamePostNotifierProvider(myAccount).notifier)
             .reloadPosts(myAccount);
         ref.read(gamePostNotifierProvider.notifier).reloadGamePostData();
+        state = state.copyWith(isGamePostSuccessful: true); // 投稿完了を知らせる
 
-        return true;
-      } else {
-        return false;
+        return;
       }
     } catch (e) {
       AppLogger.instance.error("投稿削除 $e");
     } finally {
-      LoadingManager.instance.stopLoading(ref);
+      state = state.copyWith(isLoading: false); // 読み込み開始
     }
-    return false;
   }
 
   //入力チェック
   bool isValidGameState(WidgetRef ref) {
-    var gamePostState = ref.read(gameStateNotifierProvider);
+    var gamePostState = state;
 
     String teamName = gamePostState.teamName;
-    String ageString = gamePostState.ageString;
+    List<String> ageString = gamePostState.ageList;
     String prefecture = gamePostState.prefecture;
 
-    String locationTagString = gamePostState.locationTagString;
+    List<String> locationTagString = gamePostState.locationTagList;
     int level = gamePostState.level;
 
     if (gamePostState.teamName.isEmpty || teamName.isEmpty) {
@@ -213,12 +258,12 @@ class GamePostViewModel extends ChangeNotifier {
       showErrorSnackBar(context: ref.context, text: "チーム名が短いです");
       return false;
     }
-    if (gamePostState.locationTagString.isEmpty || locationTagString == []) {
+    if (locationTagString == []) {
       showErrorSnackBar(context: ref.context, text: "詳しい活動場所が入力されていません");
       return false;
     }
 
-    if (gamePostState.ageString.isEmpty || ageString.isEmpty) {
+    if (ageString.isEmpty) {
       showErrorSnackBar(context: ref.context, text: "年齢層が選択されていません");
       return false;
     }
@@ -240,23 +285,9 @@ class GamePostViewModel extends ChangeNotifier {
     if (isEditing == false) {
       return null;
     }
-    final currentPost = await loadGamePost(postId);
+    final currentPost = await GamePostFirestore().getGamePostFromIds(postId);
     if (currentPost != null) {
       return currentPost[0];
-    }
-    return null;
-  }
-
-  //gamePostの読み込み完了を知らせる
-  Future<List<GamePost>?> loadGamePost(String postId) async {
-    try {
-      final loadedPosts = await GamePostFirestore().getGamePostFromIds(postId);
-      if (loadedPosts != null && loadedPosts.isNotEmpty) {
-        return loadedPosts;
-      }
-    } catch (e) {
-      print(getErrorMessage(e));
-      throw getErrorMessage(e);
     }
     return null;
   }
@@ -320,5 +351,25 @@ class GamePostViewModel extends ChangeNotifier {
       AppLogger.instance.error("投稿取得エラー $e");
       throw e;
     }
+  }
+
+  Future<File?> handleHeaderImageTap() async {
+    try {
+      state = state.copyWith(isLoading: true);
+      var result = await cropHeaderImage();
+      if (result != null) {
+        // 選択した画像をFileオブジェクトに変換
+        state = state.copyWith(imagePath: result.path);
+        return File(result.path);
+        //新しい画像が追加されたら、元々の画像をnullにして、表示させる
+        // imageUrl = null;
+      }
+    } catch (e) {
+      // エラー処理
+    } finally {
+      // ローダーを非表示
+      state = state.copyWith(isLoading: false);
+    }
+    return null;
   }
 }

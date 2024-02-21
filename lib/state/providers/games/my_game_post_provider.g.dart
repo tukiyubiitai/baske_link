@@ -7,7 +7,7 @@ part of 'my_game_post_provider.dart';
 // **************************************************************************
 
 String _$myGamePostNotifierHash() =>
-    r'a463316ac5faf726d865ac2e8ef3d67ed53e328a';
+    r'4fcb0c3e45d4f6a3e865f09e3040a7e71dd9f9bd';
 
 /// Copied from Dart SDK
 class _SystemHash {

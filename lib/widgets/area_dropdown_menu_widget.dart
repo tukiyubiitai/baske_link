@@ -1,9 +1,9 @@
+import 'package:basketball_app/state/providers/providers.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/posts/area_model.dart';
-import '../state/providers/games/game_post_notifier.dart';
 import '../state/providers/team/team_post_notifier.dart';
 
 // エリア
@@ -16,7 +16,7 @@ class AreaDropdownMenuWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final TextEditingController searchController = TextEditingController();
-    final gameProvider = ref.watch(gameStateNotifierProvider);
+    final gameProvider = ref.watch(gamePostManagerProvider);
     final teamProvider = ref.watch(teamStateNotifierProvider);
 
     return Container(
@@ -56,12 +56,10 @@ class AreaDropdownMenuWidget extends ConsumerWidget {
           onChanged: (value) {
             if (value != null) {
               if (type == 'game') {
-                ref
-                    .watch(gameStateNotifierProvider.notifier)
-                    .onPrefectureChange(value);
+                ref.read(gamePostManagerProvider.notifier).addPrefecture(value);
               } else {
                 ref
-                    .watch(teamStateNotifierProvider.notifier)
+                    .read(teamStateNotifierProvider.notifier)
                     .onPrefectureChange(value);
               }
             }

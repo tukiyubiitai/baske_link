@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../models/account/account.dart';
 import '../../models/posts/game_model.dart';
 import 'game_body.dart';
@@ -22,7 +23,6 @@ class GamePostItem extends StatelessWidget {
       children: [
         Container(
           margin: const EdgeInsets.all(20),
-          // height: MediaQuery.of(context).size.height * 0.9,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
             color: Colors.white,

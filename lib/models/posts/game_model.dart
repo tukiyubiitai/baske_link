@@ -1,39 +1,30 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../account/account.dart';
 
-class GamePost {
-  final String id;
-  final String postAccountId;
-  final List<String> locationTagList; //エリア
-  final String prefecture; // 場所
-  final int level; // レベル
-  final String teamName; // チーム名
-  final Timestamp createdTime; //投稿時間
-  final String member; //構成メンバー
-  final List<String> ageList; //年齢層
+part 'game_model.freezed.dart';
 
-  final String type; //投稿種類
+@freezed
+class GamePost with _$GamePost {
+  const factory GamePost({
+    @Default('') String id,
+    required String postAccountId,
+    required List<String> locationTagList, //エリア
+    required String prefecture, // 場所
+    required int level, // レベル
+    required String teamName, // チーム名
+    required Timestamp createdTime, //投稿時間
+    required String member, //構成メンバー
+    required List<String> ageList, //年齢層
+    required String type, //投稿種類
+    @Default('') String imagePath,
+    @Default('') String oldImagePath,
+    @Default('') String note,
+    @Default(false) bool isLoading,
+    @Default(false) bool isGamePostSuccessful,
+  }) = _GamePost;
 
-  String? imageUrl; //画像
-  String? note; //自由欄
-
-  GamePost(
-      {this.id = "",
-      required this.postAccountId,
-      required this.locationTagList,
-      required this.teamName,
-      required this.level,
-      required this.prefecture,
-      required this.createdTime,
-      required this.member,
-      required this.ageList,
-      required this.type,
-      this.imageUrl,
-      this.note});
-
-// FirestoreのデータをGamePostオブジェクトに変換するファクトリコンストラクタ
-  // FirestoreのドキュメントからGamePostオブジェクトを生成するファクトリコンストラクタ
   factory GamePost.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return GamePost(
@@ -47,15 +38,16 @@ class GamePost {
       member: data['member'] ?? '',
       ageList: List<String>.from(data['ageList'] ?? []),
       type: data['type'] ?? '',
-      imageUrl: data['imageUrl'],
+      imagePath: data['imageUrl'],
       note: data['note'],
     );
   }
 }
 
-class GamePostData {
-  final List<GamePost> posts;
-  final Map<String, Account> users;
-
-  GamePostData({required this.posts, required this.users});
+@freezed
+class GamePostData with _$GamePostData {
+  const factory GamePostData({
+    required List<GamePost> posts,
+    required Map<String, Account> users,
+  }) = _GamePostData;
 }

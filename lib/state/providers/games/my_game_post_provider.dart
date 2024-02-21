@@ -11,7 +11,7 @@ class MyGamePostNotifier extends _$MyGamePostNotifier {
   @override
   Future<List<GamePost>?> build(Account myAccount) async {
     try {
-      final data = await GamePostViewModel().getMyGamePosts(myAccount);
+      final data = await GamePostManager().getMyGamePosts(myAccount);
       return data;
     } catch (e, stack) {
       throw AsyncError(e, stack);

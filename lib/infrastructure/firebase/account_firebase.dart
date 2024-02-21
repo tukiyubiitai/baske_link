@@ -24,6 +24,7 @@ class AccountFirestore {
     } catch (e) {
       print(e);
     }
+    return null;
   }
 
   // アカウントデータの取得
@@ -51,7 +52,7 @@ class AccountFirestore {
           name: userDataMap["name"],
           id: accountId,
           myToken: userDataMap["myToken"],
-          imagePath: userDataMap["image_path"],
+          imagePath: userDataMap["imagePath"],
         );
       }
 

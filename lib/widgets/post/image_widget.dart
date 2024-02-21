@@ -28,12 +28,12 @@ class HeaderImageWidget extends StatelessWidget {
           height: 250,
           decoration: BoxDecoration(
             color: Colors.grey,
-            image: imageUrl != null
+            image: imageUrl != null && imageUrl != ""
                 ? DecorationImage(
                     image: NetworkImage(imageUrl!),
                     fit: BoxFit.cover,
                   )
-                : image != null
+                : image != null && image != ""
                     ? DecorationImage(
                         image: FileImage(image!),
                         fit: BoxFit.cover,
@@ -73,12 +73,12 @@ class CircleImageWidget extends StatelessWidget {
           CircleAvatar(
             backgroundColor: Colors.indigo,
             radius: 63,
-            child: imageUrl != null
+            child: imageUrl != null && imageUrl != ""
                 ? CircleAvatar(
                     backgroundImage: NetworkImage(imageUrl!),
                     radius: 63,
                   )
-                : image != null
+                : image != null && image != ""
                     ? CircleAvatar(
                         backgroundImage: FileImage(image!),
                         radius: 63,

@@ -66,6 +66,7 @@ class GameRecruitmentPage extends ConsumerWidget {
                   itemBuilder: (BuildContext context, int index) {
                     final post = gamePostData.posts[index];
                     final user = gamePostData.users[post.postAccountId];
+                    print(gamePostData.posts[0].imagePath);
 
                     return user != null
                         ? GamePostItem(

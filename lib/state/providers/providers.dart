@@ -1,3 +1,4 @@
+import 'package:basketball_app/models/posts/game_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/account/account.dart';
@@ -26,9 +27,6 @@ final teamPostViewModel = ChangeNotifierProvider((ref) {
   return TeamPostViewModel();
 });
 
-final gamePostViewModel = ChangeNotifierProvider((ref) {
-  return GamePostViewModel();
-});
 final talkRoomViewModel = ChangeNotifierProvider((ref) {
   return TalkRoomViewModel();
 });
@@ -41,4 +39,8 @@ final errorMessageProvider = StateProvider<String?>((ref) => null);
 final accountManagerProvider =
     StateNotifierProvider<AccountManager, AccountState>((ref) {
   return AccountManager();
+});
+final gamePostManagerProvider =
+    StateNotifierProvider<GamePostManager, GamePost>((ref) {
+  return GamePostManager();
 });

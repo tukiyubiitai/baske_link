@@ -12,6 +12,7 @@ class GameHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(postData);
     DateTime createAtDateTime = postData.createdTime.toDate();
     String formattedCreatedAt =
         DateFormat('yyyy/MM/dd').format(createAtDateTime);
@@ -27,9 +28,9 @@ class GameHeader extends StatelessWidget {
               Colors.black.withOpacity(0.5), // 透明度を調整して画像を暗くします
               BlendMode.srcATop,
             ),
-            child: postData.imageUrl != null && postData.imageUrl != ""
+            child: postData.imagePath != ""
                 ? Image.network(
-                    postData.imageUrl.toString(),
+                    postData.imagePath.toString(),
                     width: double.infinity,
                     height: isTimelinePage ? 150 : 200,
                     fit: BoxFit.cover,
@@ -80,9 +81,9 @@ class GameHeader extends StatelessWidget {
           // padding: EdgeInsets.only(left: 15.0, top: 140),
           child: Row(
             children: [
-              postData.imageUrl != null
+              postData.imagePath != ""
                   ? ImageCircle(
-                      imagePath: postData.imageUrl.toString(),
+                      imagePath: postData.imagePath.toString(),
                       isTimelinePage: isTimelinePage,
                     )
                   : NoImageCircle(

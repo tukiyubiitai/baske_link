@@ -27,7 +27,7 @@ class GamePostFirestore {
       "member": newGamePost.member,
       "ageList": newGamePost.ageList,
       "created_time": Timestamp.now(),
-      "imageUrl": newGamePost.imageUrl,
+      "imageUrl": newGamePost.imagePath,
       "note": newGamePost.note,
       "type": newGamePost.type,
     });
@@ -40,7 +40,7 @@ class GamePostFirestore {
       "member": newGamePost.member,
       "ageList": newGamePost.ageList,
       "created_time": Timestamp.now(),
-      "imageUrl": newGamePost.imageUrl,
+      "imageUrl": newGamePost.imagePath,
       "note": newGamePost.note,
       "type": newGamePost.type,
     });
@@ -60,7 +60,7 @@ class GamePostFirestore {
       "member": updatedPost.member,
       "ageList": updatedPost.ageList,
       "created_time": Timestamp.now(),
-      "imageUrl": updatedPost.imageUrl,
+      "imageUrl": updatedPost.imagePath,
       "note": updatedPost.note,
     });
 
@@ -77,7 +77,7 @@ class GamePostFirestore {
       "member": updatedPost.member,
       "ageList": updatedPost.ageList,
       "created_time": Timestamp.now(),
-      "imageUrl": updatedPost.imageUrl,
+      "imageUrl": updatedPost.imagePath,
       "note": updatedPost.note,
     });
 
@@ -155,7 +155,7 @@ class GamePostFirestore {
             createdTime: data["created_time"],
             member: data["member"],
             ageList: ageList,
-            imageUrl: data["imageUrl"],
+            imagePath: data["imageUrl"],
             note: data["note"],
             type: 'game');
       }).toList();
@@ -180,17 +180,18 @@ class GamePostFirestore {
             List<String>.from(data["locationTagList"]);
         List<String> ageList = List<String>.from(data["ageList"]);
         GamePost post = GamePost(
-            postAccountId: data["post_account_id"],
-            locationTagList: locationTagList,
-            teamName: data["teamName"],
-            level: data["level"],
-            prefecture: data["prefecture"],
-            createdTime: data["created_time"],
-            member: data["member"],
-            ageList: ageList,
-            imageUrl: data["imageUrl"],
-            note: data["note"],
-            type: 'game');
+          postAccountId: data["post_account_id"],
+          locationTagList: locationTagList,
+          teamName: data["teamName"],
+          level: data["level"],
+          prefecture: data["prefecture"],
+          createdTime: data["created_time"],
+          member: data["member"],
+          ageList: ageList,
+          imagePath: data["imageUrl"],
+          note: data["note"],
+          type: 'game',
+        );
         gamePostList.add(post);
       }
       print("GamePostを取得完了FromIds");

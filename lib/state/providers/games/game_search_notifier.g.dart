@@ -7,7 +7,7 @@ part of 'game_search_notifier.dart';
 // **************************************************************************
 
 String _$gameSearchNotifierHash() =>
-    r'891f3bcff74cf98e5e60df816081040292e1d387';
+    r'6446a37033f6cb5bdc0fd122ed16c95d12f69f90';
 
 /// Copied from Dart SDK
 class _SystemHash {

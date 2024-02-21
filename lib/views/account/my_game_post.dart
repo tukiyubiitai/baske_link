@@ -59,8 +59,8 @@ class MyGamePosts extends ConsumerWidget {
               ),
               leading: CircleAvatar(
                 backgroundColor: Colors.grey,
-                backgroundImage: post.imageUrl != null && post.imageUrl != ""
-                    ? NetworkImage(post.imageUrl.toString())
+                backgroundImage: post.imagePath != ""
+                    ? NetworkImage(post.imagePath.toString())
                     : const AssetImage('assets/images/headerImage.jpg')
                         as ImageProvider,
                 radius: 30,

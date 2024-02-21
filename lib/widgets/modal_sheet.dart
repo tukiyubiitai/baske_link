@@ -1,8 +1,8 @@
+import 'package:basketball_app/state/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../dialogs/snackbar.dart';
-import '../state/providers/games/game_post_notifier.dart';
 import '../state/providers/team/team_post_notifier.dart';
 import '../views/games/game_search_results_page.dart';
 import '../views/teams/team_search_results_page.dart';
@@ -26,7 +26,7 @@ class _ModalBottomSheetContentState
   Future<void> onSearchButtonPressed() async {
     if (_textController.text.isEmpty &&
         (ref.read(teamStateNotifierProvider).prefecture.isEmpty) &&
-        (ref.read(gameStateNotifierProvider).prefecture.isEmpty)) {
+        (ref.read(gamePostManagerProvider).prefecture.isEmpty)) {
       return showErrorSnackBar(context: context, text: '何も入力されていません');
     }
     if (widget.type == "team") {
@@ -41,7 +41,7 @@ class _ModalBottomSheetContentState
         ),
       );
     } else if (widget.type == "game") {
-      final selectedValue = ref.read(gameStateNotifierProvider).prefecture;
+      final selectedValue = ref.read(gamePostManagerProvider).prefecture;
       await Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -57,7 +57,7 @@ class _ModalBottomSheetContentState
   @override
   Widget build(BuildContext context) {
     final teamProvider = ref.watch(teamStateNotifierProvider);
-    final gameProvider = ref.watch(gameStateNotifierProvider);
+    final gameProvider = ref.watch(gamePostManagerProvider);
 
     return AlertDialog(
       content: SingleChildScrollView(
