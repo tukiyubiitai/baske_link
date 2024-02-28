@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../models/posts/team_model.dart';
 import '../../state/providers/account/account_notifier.dart';
-import '../../state/providers/team/team_post_provider.dart';
+import '../../state/providers/team/team_post_notifier.dart';
 import '../../widgets/post_action.dart';
 import '../../widgets/progress_indicator.dart';
 import '../teams/details/team_detail_page.dart';

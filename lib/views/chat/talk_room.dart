@@ -4,10 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../dialogs/custom_dialogs.dart';
 import '../../models/account/account.dart';
 import '../../state/providers/account/account_notifier.dart';
-import '../../state/providers/chat/talk_room_provider.dart';
+import '../../state/providers/chat/chat_notifier.dart';
 import '../../view_models/talk_room_view_model.dart';
 import '../../widgets/chat/talk_room_list_tile.dart';
 import '../../widgets/chat/talk_room_slidable.dart';
+import '../../widgets/error/reload_widget.dart';
 import '../../widgets/progress_indicator.dart';
 
 //トークルームリストを表示させます
@@ -40,14 +41,10 @@ class TalkRoomList extends ConsumerWidget {
           textColor: Colors.white,
           indicatorColor: Colors.white,
         ),
-        error: (e, stack) => Center(
-          child: Text(
-            '予期せぬエラーが発生しました\nアプリを再起動させて下さい',
-            style: TextStyle(
-              color: Colors.white,
-            ),
-          ),
-        ),
+        error: (e, stack) => ReloadWidget(
+            onPressed: () =>
+                ref.read(talkRoomNotifierProvider.notifier).refreshTalkRooms(),
+            text: "トークルームの読み込みに失敗しました"),
         data: (rooms) {
           if (rooms == null || rooms.isEmpty) {
             //トークルームがない時の画像

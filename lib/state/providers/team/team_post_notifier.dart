@@ -4,7 +4,7 @@ import '../../../../models/posts/team_model.dart';
 import '../../../models/account/account.dart';
 import '../../../view_models/team_view_model.dart';
 
-part 'team_post_provider.g.dart';
+part 'team_post_notifier.g.dart';
 
 @riverpod
 class TeamPostNotifier extends _$TeamPostNotifier {

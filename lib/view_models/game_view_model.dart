@@ -12,7 +12,7 @@ import '../../models/posts/game_model.dart';
 import '../dialogs/snackbar.dart';
 import '../infrastructure/image_processing/image_processing_utils.dart';
 import '../state/providers/account/account_notifier.dart';
-import '../state/providers/games/game_post_provider.dart';
+import '../state/providers/games/game_post_notifier.dart';
 import '../state/providers/post/post_notifier.dart';
 import '../utils/loading_manager.dart';
 import '../utils/logger.dart';

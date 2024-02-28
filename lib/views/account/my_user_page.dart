@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../state/providers/account/account_notifier.dart';
-import '../../state/providers/games/game_post_provider.dart';
-import '../../state/providers/team/team_post_provider.dart';
+import '../../state/providers/games/game_post_notifier.dart';
+import '../../state/providers/team/team_post_notifier.dart';
 import '../../widgets/account/user_actions_menu.dart';
 import '../../widgets/account/user_profile_circle.dart';
 import 'my_game_post.dart';

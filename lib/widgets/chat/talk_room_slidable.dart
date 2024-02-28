@@ -4,7 +4,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../../dialogs/custom_dialogs.dart';
 import '../../dialogs/snackbar.dart';
-import '../../state/providers/chat/talk_room_provider.dart';
+import '../../state/providers/chat/chat_notifier.dart';
 import '../../view_models/talk_room_view_model.dart';
 
 class TalkRoomSlidable extends ConsumerWidget {

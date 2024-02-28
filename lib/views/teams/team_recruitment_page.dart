@@ -3,7 +3,7 @@ import 'package:basketball_app/widgets/error/reload_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../state/providers/team/team_post_provider.dart';
+import '../../state/providers/team/team_post_notifier.dart';
 import '../../widgets/modal_sheet.dart';
 import '../../widgets/progress_indicator.dart';
 import '../../widgets/teams/team_post_items.dart';

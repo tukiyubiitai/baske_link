@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../state/providers/games/game_post_provider.dart';
+import '../../state/providers/games/game_post_notifier.dart';
 import '../../widgets/error/reload_widget.dart';
 import '../../widgets/games/game_post_item.dart';
 import '../../widgets/modal_sheet.dart';

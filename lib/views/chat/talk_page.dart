@@ -4,10 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/talk/talkroom.dart';
 import '../../models/account/account.dart';
 import '../../state/providers/account/account_notifier.dart';
-import '../../state/providers/chat/message_provider.dart';
+import '../../state/providers/chat/chat_notifier.dart';
 import '../../view_models/message_view_model.dart';
 import '../../widgets/chat/message_list_widget.dart';
 import '../../widgets/common_widgets/back_button_widget.dart';
+import '../../widgets/error/reload_widget.dart';
 import '../../widgets/progress_indicator.dart';
 import '../../widgets/report/user_block_and_report_menu.dart';
 
@@ -71,14 +72,11 @@ class _TalkPageState extends ConsumerState<TalkPage> {
       body: Stack(
         children: [
           messageAsyncValue.when(
-            error: (e, stack) => Center(
-              child: Text(
-                '予期せぬエラーが発生しました\nアプリを再起動させて下さい',
-                style: TextStyle(
-                  color: Colors.white,
-                ),
-              ),
-            ),
+            error: (e, stack) => ReloadWidget(
+                onPressed: () => ref
+                    .read(messageNotifierProvider(widget.talkRoom).notifier)
+                    .refreshMessages(),
+                text: "トークルームの読み込みに失敗しました"),
             loading: () => ShowProgressIndicator(
               textColor: Colors.white,
               indicatorColor: Colors.white,

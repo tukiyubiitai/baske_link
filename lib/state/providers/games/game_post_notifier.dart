@@ -5,7 +5,7 @@ import '../../../../models/posts/game_model.dart';
 import '../../../models/account/account.dart';
 import '../../../view_models/game_view_model.dart';
 
-part 'game_post_provider.g.dart';
+part 'game_post_notifier.g.dart';
 
 @riverpod
 class GamePostNotifier extends _$GamePostNotifier {

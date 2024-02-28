@@ -9,8 +9,7 @@ import '../../models/account/account.dart';
 import '../../models/talk/message.dart';
 import '../../models/talk/talkroom.dart';
 import '../state/providers/account/account_notifier.dart';
-import '../state/providers/chat/message_provider.dart';
-import '../state/providers/chat/talk_room_provider.dart';
+import '../state/providers/chat/chat_notifier.dart';
 
 class MessageViewModel extends ChangeNotifier {
   //メッセージ送信時に呼ばれる

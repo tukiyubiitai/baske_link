@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/account/account.dart';
 import '../dialogs/snackbar.dart';
-import '../state/providers/chat/talk_room_provider.dart';
+import '../state/providers/chat/chat_notifier.dart';
 
 class TalkRoomViewModel extends ChangeNotifier {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;

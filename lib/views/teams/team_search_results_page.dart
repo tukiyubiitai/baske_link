@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../state/providers/team/team_post_provider.dart';
+import '../../state/providers/team/team_post_notifier.dart';
 import '../../widgets/common_widgets/back_button_widget.dart';
 import '../../widgets/progress_indicator.dart';
 import '../../widgets/teams/team_post_items.dart';

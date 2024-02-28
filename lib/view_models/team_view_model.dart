@@ -14,9 +14,8 @@ import '../../utils/error_handler.dart';
 import '../dialogs/snackbar.dart';
 import '../infrastructure/image_processing/image_processing_utils.dart';
 import '../state/providers/account/account_notifier.dart';
-
 import '../state/providers/post/post_notifier.dart';
-import '../state/providers/team/team_post_provider.dart';
+import '../state/providers/team/team_post_notifier.dart';
 
 class TeamPostManager extends StateNotifier<TeamPost> {
   final FirebaseStorage storage = FirebaseStorage.instance;
