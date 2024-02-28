@@ -20,26 +20,16 @@ class MessageNotifier extends _$MessageNotifier {
     return await MessageViewModel().fetchRoomMessages(talkRoom, myAccount);
   }
 
-  void addMessage(Message message) {
+  Future<void> addMessage(Message message) async {
     _messages.insert(0, message); // リストの先頭にメッセージを追加
-    state = AsyncValue.data(List.from(_messages)); // 状態を更新
+    state = await AsyncValue.guard(() => _loadMessage());
   }
 
   // メッセージ再読み込み
   Future<void> refreshMessages(TalkRoom talkRoom) async {
     // AsyncValueのloading状態を設定
     state = AsyncValue.loading();
-
-    try {
-      // トークルームのリストを再取得
-      state = await AsyncValue.guard(() => _loadMessage());
-
-      List<Message>? updatedMessages = await build(talkRoom);
-      // 状態をAsyncValueのdata状態に更新
-      state = AsyncValue.data(updatedMessages);
-    } catch (e, stackTrace) {
-      // エラーが発生した場合はAsyncValueのerror状態に更新
-      state = AsyncValue.error(e, stackTrace);
-    }
+    // トークルームのリストを再取得
+    state = await AsyncValue.guard(() => _loadMessage());
   }
 }

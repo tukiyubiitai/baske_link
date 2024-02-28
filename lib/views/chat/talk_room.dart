@@ -37,8 +37,8 @@ class TalkRoomList extends ConsumerWidget {
       ),
       body: talkRoomsAsyncValue.when(
         loading: () => ShowProgressIndicator(
-          textColor: Colors.black,
-          indicatorColor: Colors.indigo,
+          textColor: Colors.white,
+          indicatorColor: Colors.white,
         ),
         error: (e, stack) => Center(
           child: Text(

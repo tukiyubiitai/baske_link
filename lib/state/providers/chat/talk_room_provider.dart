@@ -9,10 +9,12 @@ part 'talk_room_provider.g.dart';
 @riverpod
 class TalkRoomNotifier extends _$TalkRoomNotifier {
   @override
-  Future<List<TalkRoom>?> build() async {
+  Future<List<TalkRoom>?> build() => _loadTalkRooms();
+
+  Future<List<TalkRoom>?> _loadTalkRooms() async {
     try {
       String uid = ref.read(accountNotifierProvider).id;
-      return RoomFirestore().fetchJoinedRooms(uid);
+      return await RoomFirestore().fetchJoinedRooms(uid);
     } catch (e) {
       throw Exception('データの取得に失敗しました');
     }
@@ -23,14 +25,9 @@ class TalkRoomNotifier extends _$TalkRoomNotifier {
     // AsyncValueのloading状態を設定
     state = AsyncValue.loading();
 
-    try {
+
       // トークルームのリストを再取得
-      List<TalkRoom>? updatedRooms = await build();
-      // 状態をAsyncValueのdata状態に更新
-      state = AsyncValue.data(updatedRooms);
-    } catch (e, stackTrace) {
-      // エラーが発生した場合はAsyncValueのerror状態に更新
-      state = AsyncValue.error(e, stackTrace);
-    }
+    state = await AsyncValue.guard(() => _loadTalkRooms());
+
   }
 }

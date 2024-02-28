@@ -80,8 +80,8 @@ class _TalkPageState extends ConsumerState<TalkPage> {
               ),
             ),
             loading: () => ShowProgressIndicator(
-              textColor: Colors.black,
-              indicatorColor: Colors.indigo,
+              textColor: Colors.white,
+              indicatorColor: Colors.white,
             ),
             data: (messages) {
               if (messages.isEmpty) {

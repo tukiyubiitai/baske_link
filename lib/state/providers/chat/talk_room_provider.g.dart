@@ -6,7 +6,7 @@ part of 'talk_room_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$talkRoomNotifierHash() => r'53bfc4b65d619f62a31cbd12921c8a0458802e18';
+String _$talkRoomNotifierHash() => r'c8ae7dc6664e61615dbbb87b6b1ae39b73617653';
 
 /// See also [TalkRoomNotifier].
 @ProviderFor(TalkRoomNotifier)
