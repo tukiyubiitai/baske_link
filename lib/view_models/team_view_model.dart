@@ -1,5 +1,6 @@
+import 'dart:io';
+
 import 'package:basketball_app/infrastructure/firebase/team_posts_firebase.dart';
-import 'package:basketball_app/state/providers/providers.dart';
 import 'package:basketball_app/view_models/post_view_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -11,16 +12,13 @@ import '../../models/account/account.dart';
 import '../../models/posts/team_model.dart';
 import '../../utils/error_handler.dart';
 import '../dialogs/snackbar.dart';
+import '../infrastructure/image_processing/image_processing_utils.dart';
 import '../state/providers/account/account_notifier.dart';
-import '../state/providers/global_loader.dart';
-import '../state/providers/post/age_notifier.dart';
-import '../state/providers/post/tag_area_notifier.dart';
-import '../state/providers/post/target_notifier.dart';
-import '../state/providers/team/my_team_post_provider.dart';
-import '../state/providers/team/team_post_notifier.dart';
+
+import '../state/providers/post/post_notifier.dart';
 import '../state/providers/team/team_post_provider.dart';
 
-class TeamPostViewModel extends ChangeNotifier {
+class TeamPostManager extends StateNotifier<TeamPost> {
   final FirebaseStorage storage = FirebaseStorage.instance;
 
   static final _firestoreInstance = FirebaseFirestore.instance;
@@ -28,13 +26,98 @@ class TeamPostViewModel extends ChangeNotifier {
   static final CollectionReference teamPosts =
       _firestoreInstance.collection("teamPosts");
 
+  TeamPostManager()
+      : super(TeamPost(
+          postAccountId: "",
+          prefecture: "",
+          activityTime: "",
+          teamName: "",
+          createdTime: Timestamp.now(),
+          locationTagList: [],
+          targetList: [],
+          ageList: [],
+          type: "team",
+        ));
+
+  void onUserIdChange(String id) {
+    state = state.copyWith(id: id);
+  }
+
+  void onPostAccountIdChange(String postAccountId) {
+    state = state.copyWith(postAccountId: postAccountId);
+  }
+
+  void onTeamNameChange(String teamName) {
+    state = state.copyWith(teamName: teamName);
+  }
+
+  void onActivityTimeChange(String activityTime) {
+    state = state.copyWith(activityTime: activityTime);
+  }
+
+  void onPrefectureChange(String prefecture) {
+    state = state.copyWith(prefecture: prefecture);
+  }
+
+  void onLocationTagStringChange(List<String> locationTagList) {
+    state = state.copyWith(locationTagList: locationTagList);
+  }
+
+  void onTargetStringChange(List<String> targetList) {
+    state = state.copyWith(targetList: targetList);
+  }
+
+  void onAgeStringChange(List<String> ageList) {
+    state = state.copyWith(ageList: ageList);
+  }
+
+  void onTeamAppealChange(String teamAppeal) {
+    state = state.copyWith(teamAppeal: teamAppeal);
+  }
+
+  void onCostChange(String cost) {
+    state = state.copyWith(cost: cost);
+  }
+
+  void onGoalChange(String goal) {
+    state = state.copyWith(goal: goal);
+  }
+
+  void onMemberCountChange(String memberCount) {
+    state = state.copyWith(memberCount: memberCount);
+  }
+
+  void onImageChange(String imagePath) {
+    state = state.copyWith(imagePath: imagePath);
+  }
+
+  void onHeaderUrlChange(String headerUrl) {
+    state = state.copyWith(headerUrl: headerUrl);
+  }
+
+  void onNoteChange(String note) {
+    state = state.copyWith(note: note);
+  }
+
+  void onTypeChange(String type) {
+    state = state.copyWith(type: type);
+  }
+
+  void addOldImage(String oldImageUrl) {
+    state = state.copyWith(oldImagePath: oldImageUrl);
+  }
+
+  void addOldHeaderImage(String oldHeaderUrl) {
+    state = state.copyWith(oldHeaderImagePath: oldHeaderUrl);
+  }
+
   //投稿を保存する
-  Future<bool> teamPostSubmit(WidgetRef ref) async {
-    var teamState = ref.read(teamStateNotifierProvider);
+  Future<void> teamPostSubmit(WidgetRef ref) async {
+    var teamState = state;
     var ageState = ref.read(ageStateProvider);
     var targetState = ref.read(targetStateProvider);
     final tagProvider = ref.read(tagAreaStateProvider);
-    final accountState = ref.read(accountManagerProvider);
+    final myAccount = ref.read(accountNotifierProvider);
 
     String teamName = teamState.teamName;
     String activityTime = teamState.activityTime;
@@ -43,27 +126,26 @@ class TeamPostViewModel extends ChangeNotifier {
     String goal = teamState.goal.toString();
     String cost = teamState.cost.toString();
     String note = teamState.note.toString();
-    String? imagePath = teamState.imageUrl;
+    String? imagePath = teamState.imagePath;
     String? headerImagePath = teamState.headerUrl;
 
     // 入力検証のロジック
     if (!isValidTeamState(ref)) {
-      return false;
+      return;
     }
     try {
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(true);
+      state = state.copyWith(isLoading: true); // 読み込み開始
 
-      final String? headerUrl =
-          headerImagePath != null && headerImagePath.isNotEmpty
-              ? await PostViewModel().uploadPostImage(headerImagePath, "")
-              : null;
+      final String? headerUrl = headerImagePath.isNotEmpty
+          ? await PostViewModel().uploadPostImage(headerImagePath, "")
+          : "";
 
-      final String? url = imagePath != null && imagePath.isNotEmpty
+      final String? url = imagePath.isNotEmpty
           ? await PostViewModel().uploadPostImage(imagePath, "")
-          : null;
+          : "";
 
       TeamPost newPost = TeamPost(
-        postAccountId: accountState.id,
+        postAccountId: myAccount.id,
         locationTagList: tagProvider,
         goal: goal,
         activityTime: activityTime,
@@ -71,47 +153,41 @@ class TeamPostViewModel extends ChangeNotifier {
         prefecture: prefecture,
         teamName: teamName,
         createdTime: Timestamp.now(),
-        imageUrl: url,
-        headerUrl: headerUrl,
+        imagePath: url.toString(),
+        headerUrl: headerUrl.toString(),
         note: note,
         ageList: ageState,
         cost: cost,
         type: 'team',
         memberCount: "",
         teamAppeal: teamAppeal,
-        prefectureAndLocation: [],
       );
 
       //保存処理
       var result = await TeamPostFirestore.teamAddPost(newPost);
-      if (result == true) {
-        //画面更新
+      if (result) {
         //timeLine更新
         await ref.read(teamPostNotifierProvider.notifier).reloadTeamPostData();
-        return true;
-      } else {
-        return false;
+        state = state.copyWith(isTeamPostSuccessful: true);
+        return;
       }
     } catch (e) {
       throw getErrorMessage(e);
     } finally {
       //ロード終わり
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(false);
+      state = state.copyWith(isLoading: false); // 読み込み開始
     }
   }
 
   // 投稿を更新する関数
-  Future<bool> updateTeamPost(String postId, WidgetRef ref) async {
-    var teamState = ref.read(teamStateNotifierProvider);
+  Future<void> updateTeamPost(String postId, WidgetRef ref) async {
+    var teamState = state;
     var ageState = ref.read(ageStateProvider);
     var targetState = ref.read(targetStateProvider);
     final tagProvider = ref.read(tagAreaStateProvider);
-    final accountState = ref.read(accountManagerProvider);
 
     final myAccount = ref.read(accountNotifierProvider);
 
-    //ローカルからデータを取ってくる
-    // var _pref = await SharedPreferences.getInstance();
     String teamName = teamState.teamName;
     String activityTime = teamState.activityTime;
     String prefecture = teamState.prefecture;
@@ -119,28 +195,28 @@ class TeamPostViewModel extends ChangeNotifier {
     String goal = teamState.goal.toString();
     String cost = teamState.cost.toString();
     String note = teamState.note.toString();
-    String? imagePath = teamState.imageUrl;
+    String? imagePath = teamState.imagePath;
     String? headerImagePath = teamState.headerUrl;
-    String? oldImagePath = teamState.oldImageUrl;
-    String? oldHeaderImagePath = teamState.oldHeaderUrl;
+    String? oldImagePath = teamState.oldImagePath;
+    String? oldHeaderImagePath = teamState.oldHeaderImagePath;
 
     // 入力検証のロジック
     if (!isValidTeamState(ref)) {
-      return false;
+      return;
     }
 
-    ref.read(globalLoaderProvider.notifier).setLoaderValue(true);
-
     try {
+      state = state.copyWith(isLoading: true); // 読み込み開始
+
       final String? headerUrl = await PostViewModel()
-          .uploadPostImage(headerImagePath, oldHeaderImagePath ?? '');
+          .uploadPostImage(headerImagePath, oldHeaderImagePath);
 
       // 通常の画像をアップロードしてURLを取得
       final String? url =
-          await PostViewModel().uploadPostImage(imagePath, oldImagePath ?? '');
+          await PostViewModel().uploadPostImage(imagePath, oldImagePath);
 
       TeamPost updatePost = TeamPost(
-        postAccountId: accountState.id,
+        postAccountId: myAccount.id,
         locationTagList: tagProvider,
         goal: goal,
         activityTime: activityTime,
@@ -148,22 +224,21 @@ class TeamPostViewModel extends ChangeNotifier {
         prefecture: prefecture,
         teamName: teamName,
         createdTime: Timestamp.now(),
-        imageUrl: url,
-        headerUrl: headerUrl,
+        imagePath: url.toString(),
+        headerUrl: headerUrl.toString(),
         note: note,
         ageList: ageState,
         cost: cost,
         type: 'team',
         memberCount: "",
         teamAppeal: teamAppeal,
-        prefectureAndLocation: [],
       );
 
       // post更新処理
       var result =
           await TeamPostFirestore.updateTeamInDatabase(postId, updatePost);
 
-      if (result == true) {
+      if (result) {
         //画面更新
         //timeLine更新
         await ref.read(teamPostNotifierProvider.notifier).reloadTeamPostData();
@@ -171,23 +246,20 @@ class TeamPostViewModel extends ChangeNotifier {
         await ref
             .read(myTeamPostNotifierProvider(myAccount).notifier)
             .reloadPosts(myAccount);
-        return true;
-      } else {
-        return false;
+        return;
       }
     } catch (e) {
       throw getErrorMessage(e);
     } finally {
       //ロード終わり
-
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(false);
+      state = state.copyWith(isLoading: false); // 読み込み終了
     }
   }
 
   //投稿削除する関数
-  Future<bool> deleteTeamPost(TeamPost teamPost, WidgetRef ref) async {
+  Future<void> deleteTeamPost(TeamPost teamPost, WidgetRef ref) async {
     try {
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(true);
+      state = state.copyWith(isLoading: true); // 読み込み開始
 
       final myAccount = ref.read(accountNotifierProvider);
 
@@ -195,8 +267,8 @@ class TeamPostViewModel extends ChangeNotifier {
         teamPost.id,
         teamPost.postAccountId,
         teamPost.type,
-        teamPost.imageUrl ?? "",
-        teamPost.headerUrl ?? "",
+        teamPost.imagePath,
+        teamPost.headerUrl,
       );
 
       if (result) {
@@ -210,25 +282,23 @@ class TeamPostViewModel extends ChangeNotifier {
             .read(myTeamPostNotifierProvider(myAccount).notifier)
             .reloadPosts(myAccount);
 
-        return true;
-      } else {
-        return false;
+        return;
       }
     } catch (e) {
       throw getErrorMessage(e);
     } finally {
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(false);
+      state = state.copyWith(isLoading: false); // 読み込み終了
     }
   }
 
   bool isValidTeamState(WidgetRef ref) {
-    var teamState = ref.read(teamStateNotifierProvider);
+    var teamState = state;
 
     String teamName = teamState.teamName;
     String activityTime = teamState.activityTime;
-    String locationTagString = teamState.locationTagString;
-    String ageString = teamState.ageString;
-    String targetString = teamState.targetString;
+    List<String> locationTagList = teamState.locationTagList;
+    List<String> ageList = teamState.ageList;
+    List<String> targetList = teamState.targetList;
     String prefecture = teamState.prefecture;
 
     if (teamState.teamName.isEmpty || teamName.isEmpty) {
@@ -240,7 +310,7 @@ class TeamPostViewModel extends ChangeNotifier {
       showErrorSnackBar(context: ref.context, text: "チーム名が短いです");
       return false;
     }
-    if (teamState.locationTagString.isEmpty || locationTagString == []) {
+    if (locationTagList == []) {
       showErrorSnackBar(context: ref.context, text: "詳しい活動場所が入力されていません");
       return false;
     }
@@ -252,12 +322,12 @@ class TeamPostViewModel extends ChangeNotifier {
     }
 
     // バリデーション: Emailまたはパスワードが空白の場合
-    if (teamState.ageString.isEmpty || ageString.isEmpty) {
+    if (ageList.isEmpty) {
       showErrorSnackBar(context: ref.context, text: "年齢層が選択されていません");
       return false;
     }
 
-    if (teamState.targetString.isEmpty || targetString.isEmpty) {
+    if (targetList.isEmpty) {
       showErrorSnackBar(context: ref.context, text: "募集内容が選択されていません");
       return false;
     }
@@ -274,7 +344,7 @@ class TeamPostViewModel extends ChangeNotifier {
     if (isEditing == false) {
       return null;
     }
-    final currentPost = await loadPost(postId);
+    final currentPost = await TeamPostFirestore().getTeamPostById(postId);
     if (currentPost != null) {
       return currentPost[0];
     }
@@ -283,19 +353,13 @@ class TeamPostViewModel extends ChangeNotifier {
 
   //画像の読み込み
   Future<Uint8List?> loadImage(TeamPost post) async {
-    if (post.imageUrl != null) {
-      final imageRef = storage.refFromURL(post.imageUrl.toString());
-      return (await imageRef.getData());
-    }
-    return null;
+    final imageRef = storage.refFromURL(post.imagePath.toString());
+    return (await imageRef.getData());
   } //画像の読み込み
 
   Future<Uint8List?> loadHeaderRefImage(TeamPost post) async {
-    if (post.headerUrl != null) {
-      final headerRef = storage.refFromURL(post.headerUrl.toString());
-      return (await headerRef.getData());
-    }
-    return null;
+    final headerRef = storage.refFromURL(post.headerUrl.toString());
+    return (await headerRef.getData());
   }
 
   Future<List<TeamPost>?> getMyTeamPosts(Account myAccount) async {
@@ -350,23 +414,56 @@ class TeamPostViewModel extends ChangeNotifier {
     return await TeamPostFirestore().fetchTeamPosts(query);
   }
 
-  //データ取得を知らせる
-  Future<List<TeamPost>?> loadPost(String postId) async {
-    final loadedPosts = await TeamPostFirestore().getTeamPostById(postId);
-    if (loadedPosts != null && loadedPosts.isNotEmpty) {
-      return loadedPosts;
-    }
-
-    return null;
-  }
-
   Future<TeamPost?> checkMode(String? postId, bool isEditing) async {
     if (isEditing == false) {
       return null;
     }
-    final currentPost = await loadPost(postId!);
+    final currentPost =
+        await TeamPostFirestore().getTeamPostById(postId as String);
     if (currentPost != null) {
       return currentPost[0];
+    }
+    return null;
+  }
+
+  Future<File?> handleHeaderImageTap() async {
+    try {
+      state = state.copyWith(isLoading: true);
+      var result = await cropHeaderImage();
+      if (result != null) {
+        // 選択した画像をFileオブジェクトに変換
+        state = state.copyWith(headerUrl: result.path);
+        state = state.copyWith(oldHeaderImagePath: "");
+        return File(result.path);
+        //新しい画像が追加されたら、元々の画像をnullにして、表示させる
+        // imageUrl = null;
+      }
+    } catch (e) {
+      // エラー処理
+    } finally {
+      // ローダーを非表示
+      state = state.copyWith(isLoading: false);
+    }
+    return null;
+  }
+
+  Future<File?> handleImageTap() async {
+    try {
+      state = state.copyWith(isLoading: true);
+      var result = await cropImage();
+      if (result != null) {
+        // 選択した画像をFileオブジェクトに変換
+        state = state.copyWith(imagePath: result.path);
+        state = state.copyWith(oldImagePath: "");
+        return File(result.path);
+        //新しい画像が追加されたら、元々の画像をnullにして、表示させる
+        // imageUrl = null;
+      }
+    } catch (e) {
+      // エラー処理
+    } finally {
+      // ローダーを非表示
+      state = state.copyWith(isLoading: false);
     }
     return null;
   }

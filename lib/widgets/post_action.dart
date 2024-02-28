@@ -10,8 +10,6 @@ import '../models/posts/team_model.dart';
 import '../models/user_choice.dart';
 import '../state/providers/account/account_notifier.dart';
 import '../state/providers/games/game_post_provider.dart';
-import '../state/providers/games/my_game_post_provider.dart';
-import '../state/providers/team/my_team_post_provider.dart';
 import '../state/providers/team/team_post_provider.dart';
 import '../view_models/game_view_model.dart';
 import '../view_models/post_view_model.dart';
@@ -144,9 +142,9 @@ class _TestActionState extends ConsumerState<PostAction> {
     late bool result;
     try {
       if (widget.teamPostData != null) {
+        await TeamPostManager().deleteTeamPost(widget.teamPostData!, ref);
         //TeamPostの削除処理
-        result =
-            await TeamPostViewModel().deleteTeamPost(widget.teamPostData!, ref);
+        result = ref.read(teamPostManagerProvider).isTeamPostSuccessful;
       } else if (widget.gamePostData != null) {
         // GamePostの削除処理
         await GamePostManager().deleteGamePost(widget.gamePostData!, ref);

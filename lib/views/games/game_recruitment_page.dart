@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../state/providers/games/game_post_provider.dart';
+import '../../widgets/error/reload_widget.dart';
 import '../../widgets/games/game_post_item.dart';
 import '../../widgets/modal_sheet.dart';
 import '../../widgets/progress_indicator.dart';
@@ -33,7 +34,10 @@ class GameRecruitmentPage extends ConsumerWidget {
             },
           );
         },
-        child: const Icon(Icons.manage_search),
+        child: const Icon(
+          Icons.manage_search,
+          color: Colors.white,
+        ),
       ),
       body: Column(
         children: [
@@ -43,14 +47,11 @@ class GameRecruitmentPage extends ConsumerWidget {
                 textColor: Colors.white,
                 indicatorColor: Colors.white,
               ),
-              error: (e, stack) => Center(
-                child: Text(
-                  '予期せぬエラーが発生しました\nアプリを再起動させて下さい',
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+              error: (e, stack) => ReloadWidget(
+                  onPressed: () => ref
+                      .read(gamePostNotifierProvider.notifier)
+                      .reloadGamePostData(),
+                  text: "投稿の読み込みに失敗しました"),
               data: (gamePostData) {
                 if (gamePostData.posts.isEmpty) {
                   return const Center(

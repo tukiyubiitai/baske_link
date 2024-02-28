@@ -13,9 +13,7 @@ import '../dialogs/snackbar.dart';
 import '../infrastructure/image_processing/image_processing_utils.dart';
 import '../state/providers/account/account_notifier.dart';
 import '../state/providers/games/game_post_provider.dart';
-import '../state/providers/games/my_game_post_provider.dart';
-import '../state/providers/post/age_notifier.dart';
-import '../state/providers/post/tag_area_notifier.dart';
+import '../state/providers/post/post_notifier.dart';
 import '../utils/loading_manager.dart';
 import '../utils/logger.dart';
 
@@ -77,8 +75,6 @@ class GamePostManager extends StateNotifier<GamePost> {
 
   //gamePost保存
   Future<void> gamePostSubmit(WidgetRef ref) async {
-    state = state.copyWith(isLoading: true); // 読み込み開始
-
     var gamePostState = state;
     var ageTag = ref.read(ageStateProvider);
     final locationTag = ref.read(tagAreaStateProvider);
@@ -99,7 +95,7 @@ class GamePostManager extends StateNotifier<GamePost> {
 
     try {
       //ロード開始
-      LoadingManager.instance.startLoading(ref);
+      state = state.copyWith(isLoading: true); // 読み込み開始
 
       // 画像をアップロードしてURLを取得
       final String? url = imageUrl.isNotEmpty
@@ -162,7 +158,6 @@ class GamePostManager extends StateNotifier<GamePost> {
 
     try {
       //ロード開始
-      LoadingManager.instance.startLoading(ref);
 
       // 画像をアップロードしてURLを取得
       final String? url =

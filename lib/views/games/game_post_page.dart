@@ -10,8 +10,7 @@ import '../../bottom_navigation.dart';
 import '../../dialogs/snackbar.dart';
 import '../../models/posts/chip_Item.dart';
 import '../../models/posts/game_model.dart';
-import '../../state/providers/post/age_notifier.dart';
-import '../../state/providers/post/tag_area_notifier.dart';
+import '../../state/providers/post/post_notifier.dart';
 import '../../utils/filter_functions.dart';
 import '../../widgets/area_dropdown_menu_widget.dart';
 import '../../widgets/common_widgets/back_button_widget.dart';
@@ -105,7 +104,7 @@ class _GamePostPage1State extends ConsumerState<GamePostPage> {
     final gamePostState = ref.watch(gamePostManagerProvider);
     final ageProvider = ref.watch(ageStateProvider);
 
-    // アカウント作成成功後の画面遷移
+    // 投稿後の画面遷移
     ref.listen<GamePost>(gamePostManagerProvider, (_, state) {
       // isAccountCreatedSuccessfullyがtrueに変わった場合にのみ実行
       if (state.isGamePostSuccessful) {

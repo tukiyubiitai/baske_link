@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../models/account/account.dart';
 import '../../models/posts/team_model.dart';
 import 'account_firebase.dart';
@@ -31,10 +32,9 @@ class TeamPostFirestore {
       "teamAppeal": newTeamPost.teamAppeal,
       "headerUrl": newTeamPost.headerUrl,
       "cost": newTeamPost.cost,
-      "imageUrl": newTeamPost.imageUrl,
+      "imageUrl": newTeamPost.imagePath,
       "target": newTeamPost.targetList,
       "note": newTeamPost.note,
-      "prefectureAndLocation": newTeamPost.prefectureAndLocation,
       "type": newTeamPost.type,
     });
 
@@ -53,10 +53,9 @@ class TeamPostFirestore {
       "teamAppeal": newTeamPost.teamAppeal,
       "headerUrl": newTeamPost.headerUrl,
       "cost": newTeamPost.cost,
-      "imageUrl": newTeamPost.imageUrl,
+      "imageUrl": newTeamPost.imagePath,
       "target": newTeamPost.targetList,
       "note": newTeamPost.note,
-      "prefectureAndLocation": newTeamPost.prefectureAndLocation,
       "type": newTeamPost.type,
     });
     print("投稿完了");
@@ -76,7 +75,7 @@ class TeamPostFirestore {
       "target": updatedPost.targetList,
       "age": updatedPost.ageList,
       "note": updatedPost.note,
-      "imageUrl": updatedPost.imageUrl,
+      "imageUrl": updatedPost.imagePath,
       "teamAppeal": updatedPost.teamAppeal,
       "cost": updatedPost.cost,
       "headerUrl": updatedPost.headerUrl,
@@ -102,7 +101,7 @@ class TeamPostFirestore {
       "target": updatedPost.targetList,
       "age": updatedPost.ageList,
       "note": updatedPost.note,
-      "imageUrl": updatedPost.imageUrl,
+      "imageUrl": updatedPost.imagePath,
       "teamAppeal": updatedPost.teamAppeal,
       "cost": updatedPost.cost,
       "headerUrl": updatedPost.headerUrl,
@@ -129,10 +128,6 @@ class TeamPostFirestore {
       List<String> locationTagList = List<String>.from(data["locationTagList"]);
       List<String> targetList = List<String>.from(data["target"]);
       List<String> ageList = List<String>.from(data["age"]);
-      List<String> prefectureAndLocation = [
-        ...locationTagList,
-        data["prefecture"]
-      ];
       // 投稿情報を取得してTeamPostオブジェクトを作成
       TeamPost post = TeamPost(
         id: doc.id,
@@ -148,11 +143,10 @@ class TeamPostFirestore {
         ageList: ageList,
         // List<String>に変換
         note: data["note"],
-        imageUrl: data["imageUrl"],
+        imagePath: data["imageUrl"],
         createdTime: data["created_time"],
         teamAppeal: data["teamAppeal"],
         cost: data["cost"],
-        prefectureAndLocation: prefectureAndLocation,
         headerUrl: data["headerUrl"],
         type: 'team',
       );
@@ -216,11 +210,10 @@ class TeamPostFirestore {
         targetList: targetList,
         ageList: ageList,
         note: data["note"],
-        imageUrl: data["imageUrl"],
+        imagePath: data["imageUrl"],
         createdTime: data["created_time"],
         teamAppeal: data["teamAppeal"],
         cost: data["cost"],
-        prefectureAndLocation: [],
         headerUrl: data["headerUrl"],
         type: "team",
       );

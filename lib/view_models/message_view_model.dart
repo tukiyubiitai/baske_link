@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../infrastructure/firebase/account_firebase.dart';
 import '../../infrastructure/firebase/message_firebase.dart';
 import '../../infrastructure/firebase/room_firebase.dart';
@@ -73,6 +74,7 @@ class MessageViewModel extends ChangeNotifier {
     }
   }
 
+  // メッセージの読み込み
   Future<List<Message>> fetchRoomMessages(
       TalkRoom talkRoom, Account myAccount) async {
     try {

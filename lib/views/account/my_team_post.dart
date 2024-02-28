@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../models/posts/team_model.dart';
 import '../../state/providers/account/account_notifier.dart';
-import '../../state/providers/team/my_team_post_provider.dart';
+import '../../state/providers/team/team_post_provider.dart';
 import '../../widgets/post_action.dart';
 import '../../widgets/progress_indicator.dart';
 import '../teams/details/team_detail_page.dart';
@@ -59,8 +59,8 @@ class MyTeamPosts extends ConsumerWidget {
               ),
               leading: CircleAvatar(
                 backgroundColor: Colors.grey,
-                backgroundImage: post.imageUrl != null && post.imageUrl != ""
-                    ? NetworkImage(post.imageUrl.toString())
+                backgroundImage: post.imagePath != ""
+                    ? NetworkImage(post.imagePath.toString())
                     : const AssetImage('assets/images/headerImage.jpg')
                         as ImageProvider,
                 radius: 30,

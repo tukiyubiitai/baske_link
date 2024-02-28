@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/posts/area_model.dart';
-import '../state/providers/team/team_post_notifier.dart';
 
 // エリア
 class AreaDropdownMenuWidget extends ConsumerWidget {
@@ -17,7 +16,7 @@ class AreaDropdownMenuWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final TextEditingController searchController = TextEditingController();
     final gameProvider = ref.watch(gamePostManagerProvider);
-    final teamProvider = ref.watch(teamStateNotifierProvider);
+    final teamProvider = ref.watch(teamPostManagerProvider);
 
     return Container(
       decoration: BoxDecoration(
@@ -59,7 +58,7 @@ class AreaDropdownMenuWidget extends ConsumerWidget {
                 ref.read(gamePostManagerProvider.notifier).addPrefecture(value);
               } else {
                 ref
-                    .read(teamStateNotifierProvider.notifier)
+                    .read(teamPostManagerProvider.notifier)
                     .onPrefectureChange(value);
               }
             }

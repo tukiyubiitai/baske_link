@@ -1,49 +1,36 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../account/account.dart';
 
-class TeamPost {
-  final String id; // ユーザID
-  final String postAccountId; // 投稿したユーザID
-  final String prefecture; // エリア
-  final String activityTime; // 活動時間
-  final String teamName; // チーム名
-  final Timestamp createdTime; // 投稿した日時
-  final List<String> locationTagList; // 場所
-  final List<String> targetList; // ターゲット層
-  final List<String> ageList; // 年齢層
-  final List<String>? prefectureAndLocation; // エリアと場所のリスト
-  final String? teamAppeal; // チームの魅力や募集内容
-  final String? cost; // 会費
-  final String? goal; // 目標
-  final String? memberCount; // メンバー数
-  final String? imageUrl; // 画像URL
-  final String? headerUrl; // ヘッダー画像URL
-  final String? note; // 詳細ノート
-  final String type; // 投稿の種類
+part 'team_model.freezed.dart';
 
-  TeamPost({
-    this.id = "",
-    required this.postAccountId,
-    required this.locationTagList,
-    required this.prefecture,
-    required this.activityTime,
-    required this.teamName,
-    required this.createdTime,
-    required this.targetList,
-    required this.ageList,
-    required this.type,
-    this.prefectureAndLocation,
-    this.teamAppeal,
-    this.cost,
-    this.goal,
-    this.memberCount,
-    this.imageUrl,
-    this.headerUrl,
-    this.note,
-  });
+@freezed
+class TeamPost with _$TeamPost {
+  const factory TeamPost({
+    @Default('') String id, // ユーザID
+    required String postAccountId, // 投稿したユーザID
+    required String prefecture, // エリア
+    required String activityTime, // 活動時間
+    required String teamName, // チーム名
+    required Timestamp createdTime, // 投稿した日時
+    required List<String> locationTagList, // 場所
+    required List<String> targetList, // ターゲット層
+    required List<String> ageList, // 年齢層
+    @Default('') String teamAppeal, // チームの魅力や募集内容
+    @Default('') String cost, // 会費
+    @Default('') String goal, // 目標
+    @Default('') String memberCount, // メンバー数
+    @Default('') String headerUrl, // ヘッダー画像URL
+    @Default('') String type, // 投稿の種類
+    @Default('') String imagePath,
+    @Default('') String oldImagePath,
+    @Default('') String oldHeaderImagePath,
+    @Default('') String note,
+    @Default(false) bool isLoading,
+    @Default(false) bool isTeamPostSuccessful,
+  }) = _TeamPost;
 
-  // FirestoreのデータをTeamPostオブジェクトに変換するファクトリコンストラクタ
   factory TeamPost.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
@@ -58,22 +45,21 @@ class TeamPost {
       targetList: List<String>.from(data['target'] ?? []),
       ageList: List<String>.from(data['age'] ?? []),
       type: data['type'] ?? 'team',
-      prefectureAndLocation:
-          List<String>.from(data['prefectureAndLocation'] ?? []),
       teamAppeal: data['teamAppeal'],
       cost: data['cost'],
       goal: data['goal'],
       memberCount: data['memberCount'],
-      imageUrl: data['imageUrl'],
+      imagePath: data['imageUrl'],
       headerUrl: data['headerUrl'],
       note: data['note'],
     );
   }
 }
 
-class TeamPostData {
-  final List<TeamPost> posts;
-  final List<Account> users;
-
-  TeamPostData({required this.posts, required this.users});
+@freezed
+class TeamPostData with _$TeamPostData {
+  const factory TeamPostData({
+    required List<TeamPost> posts,
+    required List<Account> users,
+  }) = _TeamPostData;
 }

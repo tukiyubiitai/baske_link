@@ -13,7 +13,9 @@ class MessageNotifier extends _$MessageNotifier {
   List<Message> _messages = [];
 
   @override
-  Future<List<Message>> build(TalkRoom talkRoom) async {
+  Future<List<Message>> build(TalkRoom talkRoom) => _loadMessage();
+
+  Future<List<Message>> _loadMessage() async {
     Account myAccount = ref.read(accountNotifierProvider);
     return await MessageViewModel().fetchRoomMessages(talkRoom, myAccount);
   }
@@ -23,12 +25,15 @@ class MessageNotifier extends _$MessageNotifier {
     state = AsyncValue.data(List.from(_messages)); // 状態を更新
   }
 
+  // メッセージ再読み込み
   Future<void> refreshMessages(TalkRoom talkRoom) async {
     // AsyncValueのloading状態を設定
     state = AsyncValue.loading();
 
     try {
       // トークルームのリストを再取得
+      state = await AsyncValue.guard(() => _loadMessage());
+
       List<Message>? updatedMessages = await build(talkRoom);
       // 状態をAsyncValueのdata状態に更新
       state = AsyncValue.data(updatedMessages);

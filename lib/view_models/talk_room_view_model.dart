@@ -12,6 +12,7 @@ class TalkRoomViewModel extends ChangeNotifier {
 
   CollectionReference get room => firestore.collection("room");
 
+  // トークルーム作成
   Future<bool> initiateChatRoomCreation(
     Account talkUserAccount,
     String myUid,
@@ -27,6 +28,7 @@ class TalkRoomViewModel extends ChangeNotifier {
     }
   }
 
+  // トークルーム非表示
   Future<void> hideTalkRoom(String roomId, String myUid) async {
     try {
       final isDeletedCollection = room.doc(roomId).collection('isHidden');
@@ -37,6 +39,7 @@ class TalkRoomViewModel extends ChangeNotifier {
     }
   }
 
+  // トークルーム削除
   Future<bool> deleteRoom(String roomId, WidgetRef ref) async {
     bool result = await RoomFirestore().deleteRoomAndSubCollections(roomId);
     if (result) {
@@ -47,6 +50,7 @@ class TalkRoomViewModel extends ChangeNotifier {
     }
   }
 
+  // 非表示にしているトークルームを読み込む
   Future<void> hiddenForUser(String myUid, WidgetRef ref) async {
     try {
       final result = await RoomFirestore().updateIsHiddenForUser(myUid);

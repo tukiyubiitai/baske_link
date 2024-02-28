@@ -1,20 +1,16 @@
 import 'dart:io';
 
 import 'package:basketball_app/models/posts/chip_Item.dart';
+import 'package:basketball_app/state/providers/providers.dart';
 import 'package:basketball_app/utils/filter_functions.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../infrastructure/image_processing/image_processing_utils.dart';
 import '../../bottom_navigation.dart';
 import '../../dialogs/snackbar.dart';
 import '../../models/posts/team_model.dart';
-import '../../state/providers/global_loader.dart';
-import '../../state/providers/post/age_notifier.dart';
-import '../../state/providers/post/tag_area_notifier.dart';
-import '../../state/providers/post/target_notifier.dart';
-import '../../state/providers/team/team_post_notifier.dart';
+import '../../state/providers/post/post_notifier.dart';
 import '../../view_models/team_view_model.dart';
 import '../../widgets/area_dropdown_menu_widget.dart';
 import '../../widgets/common_widgets/back_button_widget.dart';
@@ -34,7 +30,7 @@ class TeamPostPage extends ConsumerStatefulWidget {
 }
 
 class _TestPageState extends ConsumerState<TeamPostPage> {
-  late TeamPostViewModel _controller;
+  late TeamPostManager _controller;
 
   final TextEditingController _teamController = TextEditingController();
   final TextEditingController _activityTimeController = TextEditingController();
@@ -58,7 +54,7 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
   @override
   void initState() {
     dbRef = FirebaseDatabase.instance.ref().child('Recruitment');
-    _controller = TeamPostViewModel();
+    _controller = TeamPostManager();
     _initData();
     super.initState();
   }
@@ -73,8 +69,12 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
         if (post != null) {
           _updateStateProviders(post);
           _setTextFieldValues(post);
-          headerUrl = post.headerUrl;
-          imageUrl = post.imageUrl;
+          ref
+              .read(teamPostManagerProvider.notifier)
+              .addOldHeaderImage(post.headerUrl);
+          ref
+              .read(teamPostManagerProvider.notifier)
+              .onImageChange(post.imagePath);
         }
       }
     } catch (e) {}
@@ -94,15 +94,15 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
   void _setTextFieldValues(TeamPost post) {
     _teamController.text = post.teamName;
     _activityTimeController.text = post.activityTime;
-    _teamAppealController.text = post.teamAppeal ?? "";
-    _goalController.text = post.goal ?? "";
-    _costController.text = post.cost ?? "";
-    _noteController.text = post.note ?? "";
+    _teamAppealController.text = post.teamAppeal;
+    _goalController.text = post.goal;
+    _costController.text = post.cost;
+    _noteController.text = post.note;
   }
 
   //状態の更新
   void _updateStateProviders(TeamPost post) {
-    ref.read(teamStateNotifierProvider.notifier)
+    ref.read(teamPostManagerProvider.notifier)
       ..onTeamNameChange(post.teamName)
       ..onActivityTimeChange(post.activityTime)
       ..onTeamAppealChange(post.teamAppeal.toString())
@@ -110,10 +110,10 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
       ..onCostChange(post.cost.toString())
       ..onNoteChange(post.note.toString())
       ..onPrefectureChange(post.prefecture)
-      ..onLocationTagStringChange(post.locationTagList.join(","))
-      ..onAgeStringChange(post.ageList.join(","))
-      ..onTargetStringChange(post.targetList.join(","))
-      ..addOldImage(post.imageUrl)
+      ..onLocationTagStringChange(post.locationTagList)
+      ..onAgeStringChange(post.ageList)
+      ..onTargetStringChange(post.targetList)
+      ..addOldImage(post.imagePath)
       ..addOldHeaderImage(post.headerUrl);
 
     ref
@@ -125,19 +125,27 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(teamStateNotifierProvider);
+    final teamPostState = ref.watch(teamPostManagerProvider);
     final ageProvider = ref.watch(ageStateProvider);
     final targetProvider = ref.watch(targetStateProvider);
     final areaTagProvider = ref.watch(tagAreaStateProvider);
 
-    final loader = ref.watch(globalLoaderProvider);
     final focusNode = FocusNode();
+
+    // 投稿後の画面遷移
+    ref.listen<TeamPost>(teamPostManagerProvider, (_, state) {
+      // isAccountCreatedSuccessfullyがtrueに変わった場合にのみ実行
+      if (state.isTeamPostSuccessful) {
+        //画面遷移
+        _handleTeamPostCreation(state);
+      }
+    });
 
     return Focus(
       focusNode: focusNode,
       child: GestureDetector(
         onTap: focusNode.requestFocus,
-        child: loader == false
+        child: teamPostState.isLoading == false
             ? Scaffold(
                 backgroundColor: Colors.indigo[900],
                 appBar: AppBar(
@@ -154,35 +162,25 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
                   actions: [
                     TextButton(
                       onPressed: () async {
+                        ref
+                            .read(teamPostManagerProvider.notifier)
+                            .onLocationTagStringChange(areaTagProvider);
+                        ref
+                            .read(teamPostManagerProvider.notifier)
+                            .onAgeStringChange(ageProvider);
+
+                        ref
+                            .read(teamPostManagerProvider.notifier)
+                            .onTargetStringChange(targetProvider);
                         if (widget.isEditing == false) {
-                          ref
-                              .read(teamStateNotifierProvider.notifier)
-                              .onLocationTagStringChange(
-                                  areaTagProvider.join(","));
-                          ref
-                              .read(teamStateNotifierProvider.notifier)
-                              .onAgeStringChange(ageProvider.join(","));
-
-                          ref
-                              .read(teamStateNotifierProvider.notifier)
-                              .onTargetStringChange(targetProvider.join(","));
-
-                          await teamPostSubmit();
+                          await ref
+                              .read(teamPostManagerProvider.notifier)
+                              .teamPostSubmit(ref);
                         } else {
-                          ref
-                              .read(teamStateNotifierProvider.notifier)
-                              .onLocationTagStringChange(
-                                  areaTagProvider.join(","));
-                          ref
-                              .read(teamStateNotifierProvider.notifier)
-                              .onAgeStringChange(ageProvider.join(","));
-
-                          ref
-                              .read(teamStateNotifierProvider.notifier)
-                              .onTargetStringChange(targetProvider.join(","));
-
                           //投稿を更新処理
-                          await teamPostUpdate(widget.postId as String);
+                          await ref
+                              .read(teamPostManagerProvider.notifier)
+                              .updateTeamPost(widget.postId.toString(), ref);
                         }
                       },
                       child: Text(
@@ -215,10 +213,16 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
                       children: [
                         Stack(
                           children: [
-                            HeaderImageWidget(
-                              imageUrl: headerUrl,
-                              image: headerImage,
-                              onTap: _handleHeaderImageTap,
+                            NewHeaderImageWidget(
+                              // imageUrlがnullまたは空文字の場合はteamPostState.headerUrlを、そうでなければteamPostState.oldHeaderUrlを使用
+                              imageUrl: teamPostState.oldHeaderImagePath.isEmpty
+                                  ? teamPostState.headerUrl
+                                  : teamPostState.oldHeaderImagePath,
+                              onTap: () async {
+                                await ref
+                                    .read(teamPostManagerProvider.notifier)
+                                    .handleHeaderImageTap();
+                              },
                             ),
                             ClipRRect(
                               borderRadius: const BorderRadius.only(
@@ -234,10 +238,17 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
                                   const EdgeInsets.only(left: 20.0, top: 190),
                               child: Row(
                                 children: [
-                                  CircleImageWidget(
-                                      imageUrl: imageUrl,
-                                      image: image,
-                                      onTap: _handleImageTap),
+                                  NewCircleImageWidget(
+                                      imageUrl:
+                                          teamPostState.oldImagePath.isEmpty
+                                              ? teamPostState.imagePath
+                                              : teamPostState.oldImagePath,
+                                      onTap: () async {
+                                        await ref
+                                            .read(teamPostManagerProvider
+                                                .notifier)
+                                            .handleImageTap();
+                                      }),
                                   const SizedBox(
                                     width: 10,
                                   ),
@@ -262,7 +273,7 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
                                 prefixIcon: Icons.diversity_3,
                                 maxLength: 15,
                                 func: (value) => ref
-                                    .read(teamStateNotifierProvider.notifier)
+                                    .read(teamPostManagerProvider.notifier)
                                     .onTeamNameChange(value),
                               ),
                               TagChipsField(
@@ -274,7 +285,7 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
                                 hintText: '活動時間を入力してください',
                                 prefixIcon: Icons.event,
                                 func: (value) => ref
-                                    .read(teamStateNotifierProvider.notifier)
+                                    .read(teamPostManagerProvider.notifier)
                                     .onActivityTimeChange(value),
                                 maxLength: 15,
                               ),
@@ -359,7 +370,7 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
                                 hintText: 'TimeLineに表示されます',
                                 controller: _teamAppealController,
                                 func: (value) => ref
-                                    .read(teamStateNotifierProvider.notifier)
+                                    .read(teamPostManagerProvider.notifier)
                                     .onTeamAppealChange(value),
                               ),
                               SizedBox(
@@ -372,7 +383,7 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
                                 maxLength: 25,
                                 controller: _goalController,
                                 func: (value) => ref
-                                    .read(teamStateNotifierProvider.notifier)
+                                    .read(teamPostManagerProvider.notifier)
                                     .onGoalChange(value),
                               ),
                               CustomTextField(
@@ -382,7 +393,7 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
                                 hintText: '会費・参加費を入力してください',
                                 controller: _costController,
                                 func: (value) => ref
-                                    .read(teamStateNotifierProvider.notifier)
+                                    .read(teamPostManagerProvider.notifier)
                                     .onCostChange(value),
                               ),
                               CustomTextField(
@@ -391,7 +402,7 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
                                 hintText: 'アピールポイント・連絡事項',
                                 controller: _noteController,
                                 func: (value) => ref
-                                    .read(teamStateNotifierProvider.notifier)
+                                    .read(teamPostManagerProvider.notifier)
                                     .onNoteChange(value),
                               ),
                             ],
@@ -413,84 +424,13 @@ class _TestPageState extends ConsumerState<TeamPostPage> {
     );
   }
 
-  //ヘッダー追加処理
-  Future<void> _handleHeaderImageTap() async {
-    try {
-      // ローダーを表示
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(true);
-
-      // 画像を選択するためのロジック（たとえば、画像ピッカーを表示）
-      var result = await cropHeaderImage();
-      if (result != null) {
-        // 選択した画像をFileオブジェクトに変換
-        headerImage = File(result.path);
-        // 画像のパスをコントローラに設定
-        ref
-            .read(teamStateNotifierProvider.notifier)
-            .onHeaderUrlChange(headerImage!.path);
-        //新しい画像が追加されたら、元々の画像をnullにして、表示させる
-        headerUrl = null;
-      }
-    } catch (e) {
-      // エラー処理
-      showErrorSnackBar(context: context, text: 'エラーが発生しました: $e');
-    } finally {
-      // ローダーを非表示
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(false);
-    }
-  }
-
-  //Circle画像追加
-  Future<void> _handleImageTap() async {
-    try {
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(true);
-      var result = await cropImage();
-      if (result != null) {
-        image = File(result.path);
-        print(image!.path);
-        ref.read(teamStateNotifierProvider.notifier).onImageChange(image!.path);
-        imageUrl = null;
-      }
-    } catch (e) {
-      showErrorSnackBar(context: context, text: 'エラーが発生しました $e');
-    } finally {
-      ref.read(globalLoaderProvider.notifier).setLoaderValue(false);
-    }
-  }
-
   //保存
-  Future<void> teamPostSubmit() async {
+  Future<void> _handleTeamPostCreation(TeamPost state) async {
     try {
-      final result = await _controller.teamPostSubmit(ref);
-      if (result) {
+      if (state.isTeamPostSuccessful) {
         showSnackBar(
           context: ref.context,
           text: "投稿が完了しました！",
-          backgroundColor: Colors.white,
-          textColor: Colors.black,
-        );
-        Navigator.pushAndRemoveUntil(
-          ref.context,
-          MaterialPageRoute(
-            builder: (context) => BottomTabNavigator(
-              initialIndex: 0,
-            ), // 登録されたユーザの情報を表示する画面
-          ),
-          (route) => false, // すべてのページを破棄するため、falseを返す
-        );
-      }
-    } catch (e) {}
-  }
-
-  //更新
-  Future<void> teamPostUpdate(String postId) async {
-    try {
-      final result = await _controller.updateTeamPost(postId, ref);
-
-      if (result) {
-        showSnackBar(
-          context: ref.context,
-          text: "更新が完了しました！",
           backgroundColor: Colors.white,
           textColor: Colors.black,
         );

@@ -1,4 +1,5 @@
 import 'package:basketball_app/state/providers/providers.dart';
+import 'package:basketball_app/widgets/error/reload_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -34,7 +35,10 @@ class TeamRecruitmentPage extends ConsumerWidget {
             },
           );
         },
-        child: const Icon(Icons.manage_search),
+        child: const Icon(
+          Icons.manage_search,
+          color: Colors.white,
+        ),
       ),
       body: Column(
         children: [
@@ -44,7 +48,11 @@ class TeamRecruitmentPage extends ConsumerWidget {
                 textColor: Colors.white,
                 indicatorColor: Colors.white,
               ),
-              error: (e, stack) => Text('エラーが発生しました: $e'),
+              error: (e, stack) => ReloadWidget(
+                  onPressed: () => ref
+                      .read(teamPostNotifierProvider.notifier)
+                      .reloadTeamPostData(),
+                  text: "投稿の読み込みに失敗しました"), // 再読み込み
               data: (teamPostData) {
                 if (teamPostData.posts.isEmpty) {
                   return const Center(

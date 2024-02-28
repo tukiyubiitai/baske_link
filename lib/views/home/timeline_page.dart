@@ -31,7 +31,7 @@ class _TimelinePageState extends State<TimelinePage> {
                   builder: (BuildContext context) {
                     return AlertDialog(
                       content: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           ElevatedButton(
@@ -50,7 +50,10 @@ class _TimelinePageState extends State<TimelinePage> {
                             ),
                             child: const Text(
                               'チーム投稿',
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12),
                             ),
                           ),
                           const SizedBox(
@@ -71,9 +74,11 @@ class _TimelinePageState extends State<TimelinePage> {
                               elevation: 0, // 影をなくす
                             ),
                             child: const Text(
-                              '練習試合相手募集',
-                              style:
-                                  TextStyle(fontSize: 12, color: Colors.white),
+                              '試合相手募集',
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
@@ -122,7 +127,6 @@ class _TimelinePageState extends State<TimelinePage> {
           children: [
             //チームメイト募集
             TeamRecruitmentPage(),
-            // TestRecruitmentPage(),
             //練習募集
             GameRecruitmentPage(),
           ],

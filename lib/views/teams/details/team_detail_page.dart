@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../models/account/account.dart';
 import '../../../models/posts/team_model.dart';
 import '../../../state/providers/account/account_notifier.dart';

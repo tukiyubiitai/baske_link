@@ -2,6 +2,7 @@ import 'package:basketball_app/models/posts/game_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/account/account.dart';
+import '../../models/posts/team_model.dart';
 import '../../view_models/account_view_model.dart';
 import '../../view_models/auth_view_model.dart';
 import '../../view_models/game_view_model.dart';
@@ -23,8 +24,9 @@ final postViewModel = ChangeNotifierProvider((ref) {
   return PostViewModel();
 });
 
-final teamPostViewModel = ChangeNotifierProvider((ref) {
-  return TeamPostViewModel();
+final teamPostManagerProvider =
+    StateNotifierProvider<TeamPostManager, TeamPost>((ref) {
+  return TeamPostManager();
 });
 
 final talkRoomViewModel = ChangeNotifierProvider((ref) {

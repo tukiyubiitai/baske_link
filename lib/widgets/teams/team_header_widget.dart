@@ -22,9 +22,7 @@ class PostHeader extends StatelessWidget {
     DateTime createAtDateTime = postData.createdTime.toDate();
     String formattedCreatedAt =
         DateFormat('yyyy/MM/dd').format(createAtDateTime);
-    print("ヘッダーが呼ばれた");
 
-    print("これが画像：${postData.headerUrl}");
     return Stack(
       children: [
         ClipRRect(
@@ -37,13 +35,7 @@ class PostHeader extends StatelessWidget {
               Colors.black.withOpacity(0.5), // 透明度を調整して画像を暗くします
               BlendMode.srcATop,
             ),
-            child: postData.headerUrl != null && postData.headerUrl != ""
-                // ? Image.network(
-                //     postData.headerUrl.toString(),
-                //     width: double.infinity,
-                //     height: isTimelinePage ? 150 : 200,
-                //     fit: BoxFit.cover,
-                //   )
+            child: postData.headerUrl != ""
                 ? Image(
                     image: NetworkImage(postData.headerUrl.toString()),
                     width: double.infinity,
@@ -55,10 +47,7 @@ class PostHeader extends StatelessWidget {
                         return child;
                       } else {
                         // 画像の読み込み中に表示するウィジェット
-                        return Center(
-                            child: CircularProgressIndicator(
-                          color: Colors.blue,
-                        ));
+                        return CircularProgressIndicator();
                       }
                     },
                     errorBuilder: (BuildContext context, Object exception,
@@ -114,9 +103,9 @@ class PostHeader extends StatelessWidget {
           // padding: EdgeInsets.only(left: 15.0, top: 140),
           child: Row(
             children: [
-              postData.imageUrl != null && postData.imageUrl != ""
+              postData.imagePath != ""
                   ? ImageCircle(
-                      imagePath: postData.imageUrl.toString(),
+                      imagePath: postData.imagePath.toString(),
                       isTimelinePage: isTimelinePage,
                     )
                   : NoImageCircle(

@@ -20,7 +20,7 @@ class AuthStateNotifier extends _$AuthStateNotifier {
       final userAccount = await AccountFirestore.fetchUserData(user.uid);
       if (userAccount != null) {
         //トークン更新
-        AuthenticationService().updateUserToken(user);
+        await AuthenticationService().updateUserToken(user);
         ref.read(accountNotifierProvider.notifier).updateAccount(userAccount);
         return AuthStatus.authenticated; // 認証され、Firestoreにデータがある
       } else {
